@@ -15,18 +15,27 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'data', 'users.json');
-const SECRET_FILE = path.join(__dirname, 'data', '.jwt-secret');
+const IS_VERCEL = !!process.env.VERCEL;
+
+// On Vercel use /tmp (ephemeral but writable); locally use ./data
+const DATA_DIR = IS_VERCEL ? '/tmp' : path.join(__dirname, 'data');
+const DB_FILE = path.join(DATA_DIR, 'users.json');
+const SECRET_FILE = path.join(DATA_DIR, '.jwt-secret');
 
 // Auto-generate a strong JWT secret and persist it so tokens survive restarts
 function getJwtSecret() {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
-  const dataDir = path.join(__dirname, 'data');
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  if (fs.existsSync(SECRET_FILE)) return fs.readFileSync(SECRET_FILE, 'utf8').trim();
-  const secret = crypto.randomBytes(64).toString('hex');
-  fs.writeFileSync(SECRET_FILE, secret);
-  return secret;
+  if (!IS_VERCEL) {
+    // Local dev: persist to file
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    if (fs.existsSync(SECRET_FILE)) return fs.readFileSync(SECRET_FILE, 'utf8').trim();
+    const secret = crypto.randomBytes(64).toString('hex');
+    fs.writeFileSync(SECRET_FILE, secret);
+    return secret;
+  }
+  // Vercel: JWT_SECRET env var is required
+  console.error('Set JWT_SECRET env var on Vercel!');
+  return crypto.randomBytes(64).toString('hex');
 }
 const JWT_SECRET = getJwtSecret();
 
@@ -84,9 +93,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== DATABASE HELPERS ====================
 function ensureDataDir() {
-  const dataDir = path.join(__dirname, 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
   }
   if (!fs.existsSync(DB_FILE)) {
     fs.writeFileSync(DB_FILE, JSON.stringify({ users: [] }, null, 2));
@@ -132,8 +140,10 @@ function authMiddleware(req, res, next) {
 const AUTH_USERNAME = process.env.AUTH_USERNAME;
 const AUTH_PASSWORD = process.env.AUTH_PASSWORD;
 if (!AUTH_USERNAME || !AUTH_PASSWORD) {
-  console.error('\n❌ AUTH_USERNAME and AUTH_PASSWORD must be set in .env or environment variables!\n');
-  process.exit(1);
+  if (!IS_VERCEL) {
+    console.error('\n\u274c AUTH_USERNAME and AUTH_PASSWORD must be set in .env or environment variables!\n');
+    process.exit(1);
+  }
 }
 
 // ==================== ACCOUNT LOCKOUT ====================
@@ -266,12 +276,19 @@ app.get('/api/progress', authMiddleware, (req, res) => {
 });
 
 // ==================== CATCH-ALL (SPA) ====================
-app.get('/{*splat}', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+if (!IS_VERCEL) {
+  app.get('/{*splat}', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+}
 
 // ==================== START ====================
-app.listen(PORT, () => {
-  ensureDataDir();
-  console.log(`\n🚀 CrackTCS server running at http://localhost:${PORT}\n`);
-});
+if (!IS_VERCEL) {
+  app.listen(PORT, () => {
+    ensureDataDir();
+    console.log(`\n\ud83d\ude80 CrackTCS server running at http://localhost:${PORT}\n`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;

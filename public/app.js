@@ -36,20 +36,44 @@ const AUTH = {
     localStorage.setItem('cracktcs_token', this.token);
     localStorage.setItem('cracktcs_username', this.username);
 
-    // Load progress from server
-    const p = data.progress;
-    state.solvedSet = new Set(p.solvedIds || []);
-    state.codeStore = p.codeStore || {};
-    state.streak = p.streak || 0;
-    state.lastSolveDate = p.lastSolveDate || '';
-    state.recentSolved = p.recentSolved || [];
+    // Merge server + local progress (keep the richer dataset)
+    // This protects against Vercel /tmp wipes losing server-side data
+    const server = data.progress || {};
+    const localSolved = JSON.parse(localStorage.getItem('cracktcs_solved') || '[]');
+    const localCode = JSON.parse(localStorage.getItem('cracktcs_code') || '{}');
+    const localStreak = parseInt(localStorage.getItem('cracktcs_streak') || '0');
+    const localLastSolve = localStorage.getItem('cracktcs_lastSolve') || '';
+    const localRecent = JSON.parse(localStorage.getItem('cracktcs_recent') || '[]');
 
-    // Also update localStorage cache
+    const serverSolved = server.solvedIds || [];
+    const mergedSolvedArr = [...new Set([...localSolved, ...serverSolved])];
+    state.solvedSet = new Set(mergedSolvedArr);
+
+    // Merge code stores (server wins on conflicts, but keep local-only entries)
+    state.codeStore = { ...localCode, ...(server.codeStore || {}) };
+
+    // Use whichever streak is higher
+    state.streak = Math.max(localStreak, server.streak || 0);
+    state.lastSolveDate = server.lastSolveDate || localLastSolve;
+    
+    // Merge recent solved (deduplicate by id, keep newest first, cap at 20)
+    const recentMap = new Map();
+    [...localRecent, ...(server.recentSolved || [])].forEach(r => {
+      if (!recentMap.has(r.id) || new Date(r.date) > new Date(recentMap.get(r.id).date)) {
+        recentMap.set(r.id, r);
+      }
+    });
+    state.recentSolved = [...recentMap.values()].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20);
+
+    // Update localStorage cache with merged data
     localStorage.setItem('cracktcs_solved', JSON.stringify([...state.solvedSet]));
     localStorage.setItem('cracktcs_code', JSON.stringify(state.codeStore));
     localStorage.setItem('cracktcs_streak', state.streak.toString());
     localStorage.setItem('cracktcs_lastSolve', state.lastSolveDate);
     localStorage.setItem('cracktcs_recent', JSON.stringify(state.recentSolved));
+
+    // Sync merged data back to server
+    this.saveProgress();
 
     // Update UI
     document.getElementById('auth-overlay').classList.add('hidden');
