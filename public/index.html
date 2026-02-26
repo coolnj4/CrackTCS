@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrackTCS — Master Every TCS Coding Question</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="#" class="logo" id="logo-link">
+                <span class="logo-bracket">&lt;</span><span class="logo-text">Crack</span><span class="logo-highlight">TCS</span><span class="logo-bracket">/&gt;</span>
+            </a>
+        </div>
+        <div class="nav-center">
+            <a href="#" class="nav-link active" data-view="problems"><i class="fas fa-list"></i> Problems</a>
+            <a href="#" class="nav-link" data-view="dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a>
+        </div>
+        <div class="nav-right">
+            <div class="streak-badge">
+                <span class="streak-fire">🔥</span>
+                <span id="streak-count">0</span>
+            </div>
+            <div class="solved-badge">
+                <i class="fas fa-check-circle"></i>
+                <span id="nav-solved">0</span>/<span id="nav-total">0</span>
+            </div>
+            <div class="user-menu" id="user-menu" style="display:none">
+                <span class="user-name" id="nav-username"><i class="fas fa-user-circle"></i> <span id="display-username"></span></span>
+                <button class="logout-btn" id="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============ PROBLEMS LIST VIEW ============ -->
+    <div id="problems-view" class="view active">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="hero-crack">Crack</span><span class="hero-tcs">TCS</span>
+                </h1>
+                <p class="hero-subtitle">Master Every TCS Coding Question — NQT, Digital, CodeVita & Ninja</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-num" id="hero-total">75+</span>
+                        <span class="hero-stat-label">Questions</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">4</span>
+                        <span class="hero-stat-label">Categories</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">4</span>
+                        <span class="hero-stat-label">Languages</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problems-container">
+            <!-- Filters -->
+            <div class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search questions...">
+                </div>
+                <div class="filter-group">
+                    <select id="category-filter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="TCS NQT">TCS NQT</option>
+                        <option value="TCS Digital">TCS Digital</option>
+                        <option value="TCS CodeVita">TCS CodeVita</option>
+                        <option value="TCS Ninja">TCS Ninja</option>
+                        <option value="TCS TAG">TCS TAG</option>
+                    </select>
+                    <select id="difficulty-filter" class="filter-select">
+                        <option value="all">All Difficulty</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                    <select id="status-filter" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="solved">✅ Solved</option>
+                        <option value="unsolved">⬜ Unsolved</option>
+                    </select>
+                    <select id="tag-filter" class="filter-select">
+                        <option value="all">All Topics</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-pill total"><span id="stat-total">0</span> Total</div>
+                <div class="stat-pill easy"><span id="stat-easy">0</span> Easy</div>
+                <div class="stat-pill medium"><span id="stat-medium">0</span> Medium</div>
+                <div class="stat-pill hard"><span id="stat-hard">0</span> Hard</div>
+                <div class="stat-pill solved"><span id="stat-solved">0</span> Solved</div>
+            </div>
+
+            <!-- Problems Table -->
+            <div class="table-wrapper">
+                <table class="problems-table">
+                    <thead>
+                        <tr>
+                            <th class="col-status">Status</th>
+                            <th class="col-id">#</th>
+                            <th class="col-title">Title</th>
+                            <th class="col-category">Category</th>
+                            <th class="col-difficulty">Difficulty</th>
+                            <th class="col-tags">Tags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="problems-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ PROBLEM SOLVING VIEW ============ -->
+    <div id="solve-view" class="view">
+        <div class="solve-header">
+            <button id="back-btn" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Problems</button>
+            <div class="problem-nav">
+                <button id="prev-btn" class="nav-btn" title="Previous"><i class="fas fa-chevron-left"></i></button>
+                <span id="problem-nav-title" class="nav-title"></span>
+                <button id="next-btn" class="nav-btn" title="Next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+        <div class="solve-container">
+            <!-- Left Panel: Problem Description -->
+            <div class="left-panel" id="left-panel">
+                <div class="panel-tabs">
+                    <button class="panel-tab active" data-tab="description"><i class="fas fa-file-alt"></i> Description</button>
+                    <button class="panel-tab" data-tab="editorial"><i class="fas fa-lightbulb"></i> Hints</button>
+                </div>
+                <div class="panel-content" id="description-content">
+                    <div class="problem-title-section">
+                        <h2 id="problem-title"></h2>
+                        <div class="problem-badges">
+                            <span id="problem-difficulty" class="badge diff-badge"></span>
+                            <span id="problem-category" class="badge cat-badge"></span>
+                        </div>
+                        <div id="problem-tags" class="problem-tags"></div>
+                    </div>
+                    <div id="problem-description" class="description-body"></div>
+                </div>
+                <div class="panel-content hidden" id="editorial-content">
+                    <div class="editorial-body">
+                        <div id="hints-section" class="hints-section"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resizer -->
+            <div class="resizer" id="resizer">
+                <div class="resizer-line"></div>
+            </div>
+
+            <!-- Right Panel: Code Editor + Output -->
+            <div class="right-panel" id="right-panel">
+                <div class="editor-toolbar">
+                    <div class="toolbar-left">
+                        <select id="language-select" class="lang-select">
+                            <option value="python">Python 3</option>
+                            <option value="c">C</option>
+                            <option value="java">Java</option>
+                            <option value="javascript">JavaScript</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-right">
+                        <button id="reset-btn" class="tool-btn" title="Reset Code"><i class="fas fa-undo-alt"></i> Reset</button>
+                        <button id="fullscreen-btn" class="tool-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                        <button id="run-btn" class="action-btn run-btn-action"><i class="fas fa-play"></i> Run</button>
+                        <button id="submit-btn" class="action-btn submit-btn-action"><i class="fas fa-cloud-upload-alt"></i> Submit</button>
+                    </div>
+                </div>
+                <div id="editor-container" class="editor-container"></div>
+
+                <!-- Output Section -->
+                <div class="output-section" id="output-section">
+                    <div class="output-header">
+                        <div class="output-tabs">
+                            <button class="output-tab active" data-output="testcase"><i class="fas fa-terminal"></i> Testcase</button>
+                            <button class="output-tab" data-output="result"><i class="fas fa-check-double"></i> Result</button>
+                        </div>
+                        <button id="output-toggle" class="output-toggle"><i class="fas fa-chevron-down"></i></button>
+                    </div>
+                    <div class="output-body">
+                        <div id="testcase-panel" class="output-panel">
+                            <div class="testcase-input-group">
+                                <label>Input:</label>
+                                <textarea id="custom-input" class="custom-input" placeholder="Enter custom input here..." rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div id="result-panel" class="output-panel hidden">
+                            <div id="execution-result" class="execution-result">
+                                <p class="result-placeholder">Run or Submit your code to see results here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD VIEW ============ -->
+    <div id="dashboard-view" class="view">
+        <div class="dashboard-container">
+            <h1 class="dash-title"><i class="fas fa-chart-pie"></i> Your Progress</h1>
+            <div class="dash-grid">
+                <div class="dash-card main-card">
+                    <div class="dash-card-icon"><i class="fas fa-code"></i></div>
+                    <div class="dash-card-info">
+                        <div class="dash-card-value" id="dash-solved">0</div>
+                        <div class="dash-card-label">Problems Solved</div>
+                    </div>
+                    <div class="dash-card-total">out of <span id="dash-total">0</span></div>
+                    <div class="dash-progress-ring" id="dash-ring"></div>
+                </div>
+                <div class="dash-card easy-card">
+                    <div class="dash-card-icon"><i class="fas fa-seedling"></i></div>
+                    <div class="dash-card-info">
+                        <div class="dash-card-value" id="dash-easy">0</div>
+                        <div class="dash-card-label">Easy Solved</div>
+                    </div>
+                </div>
+                <div class="dash-card medium-card">
+                    <div class="dash-card-icon"><i class="fas fa-fire"></i></div>
+                    <div class="dash-card-info">
+                        <div class="dash-card-value" id="dash-medium">0</div>
+                        <div class="dash-card-label">Medium Solved</div>
+                    </div>
+                </div>
+                <div class="dash-card hard-card">
+                    <div class="dash-card-icon"><i class="fas fa-bolt"></i></div>
+                    <div class="dash-card-info">
+                        <div class="dash-card-value" id="dash-hard">0</div>
+                        <div class="dash-card-label">Hard Solved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="category-breakdown">
+                <h2>Category Breakdown</h2>
+                <div id="category-bars" class="category-bars"></div>
+            </div>
+            <div class="recent-activity">
+                <h2>Recently Solved</h2>
+                <div id="recent-list" class="recent-list">
+                    <p class="empty-state">No problems solved yet. Start practicing!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Running your code...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- ============ AUTH OVERLAY ============ -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <span class="logo-bracket">&lt;</span><span class="logo-text">Crack</span><span class="logo-highlight">TCS</span><span class="logo-bracket">/&gt;</span>
+            </div>
+            <p class="auth-subtitle">Sign in to save your progress</p>
+
+            <div id="auth-error" class="auth-error hidden"></div>
+
+            <form id="auth-form" class="auth-form">
+                <div class="auth-field">
+                    <label for="auth-username"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="auth-username" placeholder="Enter username" autocomplete="username" required minlength="3">
+                </div>
+                <div class="auth-field">
+                    <label for="auth-password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="auth-password" placeholder="Enter password" autocomplete="current-password" required minlength="4">
+                </div>
+                <button type="submit" class="auth-btn" id="auth-submit-btn">
+                    <i class="fas fa-sign-in-alt"></i> <span id="auth-btn-text">Sign In</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="questions.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
