@@ -52,6 +52,7 @@ app.use(helmet({
       connectSrc: ["'self'", "https://wandbox.org"],
       imgSrc: ["'self'", "data:"],
       workerSrc: ["'self'", "blob:"],
+      upgradeInsecureRequests: IS_VERCEL ? [] : null,
     }
   }
 }));

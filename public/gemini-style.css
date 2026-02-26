@@ -1,0 +1,135 @@
+/* ================================================================
+   Gemini PYQ — Additional Styles
+   Extends the base style.css with Gemini-specific theming
+   ================================================================ */
+
+/* Hero section override for Gemini */
+.gemini-hero {
+    background: linear-gradient(135deg, #1a1a3e 0%, #0f2847 40%, #1a0f3e 100%) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.gemini-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(89, 56, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(0, 194, 255, 0.06) 0%, transparent 50%);
+    animation: geminiPulse 8s ease-in-out infinite;
+}
+
+@keyframes geminiPulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+.gemini-badge {
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(89, 56, 255, 0.15);
+    border: 1px solid rgba(89, 56, 255, 0.3);
+    padding: 8px 18px;
+    border-radius: 24px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #a78bfa;
+    backdrop-filter: blur(8px);
+}
+
+.gemini-badge i {
+    color: #c084fc;
+    font-size: 0.9rem;
+}
+
+/* Hidden test info banner in problem view */
+.hidden-test-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: rgba(89, 56, 255, 0.08);
+    border: 1px solid rgba(89, 56, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.hidden-test-info i {
+    color: #a78bfa;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.hidden-test-info strong {
+    color: #c084fc;
+}
+
+/* Hidden test result cards */
+.test-result-card.hidden-test {
+    border-left: 3px solid #a78bfa;
+}
+
+.test-result-card.hidden-test .test-result-header {
+    background: rgba(89, 56, 255, 0.06);
+}
+
+.hidden-test-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: #a78bfa;
+    background: rgba(89, 56, 255, 0.12);
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hidden-test-label i {
+    font-size: 0.65rem;
+}
+
+/* Override hero title for Gemini */
+.gemini-hero .hero-crack {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gemini-hero .hero-tcs {
+    color: #c084fc;
+}
+
+/* Submission result with hidden tests */
+.hidden-tests-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: rgba(89, 56, 255, 0.06);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.hidden-tests-summary i {
+    color: #a78bfa;
+}
+
+/* Nav link active override for Gemini */
+.nav-link.active {
+    color: #a78bfa;
+    border-bottom-color: #a78bfa;
+}
