@@ -131,7 +131,8 @@ const AUTH = {
 
 // ==================== STATE ====================
 const state = {
-  currentView: 'problems',  // 'problems' | 'solve' | 'dashboard'
+  currentView: 'problems',  // 'problems' | 'solve' | 'dashboard' | 'gemini'
+  activeContext: 'main',    // 'main' | 'gemini' — which question set is active in solve view
   currentQuestion: null,
   currentLanguage: 'python',
   editor: null,
@@ -141,9 +142,23 @@ const state = {
   streak: parseInt(localStorage.getItem('cracktcs_streak') || '0'),
   lastSolveDate: localStorage.getItem('cracktcs_lastSolve') || '',
   recentSolved: JSON.parse(localStorage.getItem('cracktcs_recent') || '[]'),
+  // Gemini-specific progress (separate tracking)
+  geminiSolvedSet: new Set(JSON.parse(localStorage.getItem('gemini_solved') || '[]')),
+  geminiCodeStore: JSON.parse(localStorage.getItem('gemini_code') || '{}'),
   isRunning: false,
   resizing: false
 };
+
+// Helper functions for context-aware question/state access
+function getActiveQuestions() {
+  return state.activeContext === 'gemini' ? geminiQuestions : questions;
+}
+function getActiveSolvedSet() {
+  return state.activeContext === 'gemini' ? state.geminiSolvedSet : state.solvedSet;
+}
+function getActiveCodeStore() {
+  return state.activeContext === 'gemini' ? state.geminiCodeStore : state.codeStore;
+}
 
 // ==================== WANDBOX API ====================
 const WANDBOX_API = 'https://wandbox.org/api/compile.json';
@@ -160,14 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
   initMonaco();
   initNavigation();
   initFilters();
+  initGeminiFilters();
   initSolveView();
   initResizer();
   initDashboard();
   initAuth();
   renderProblems();
+  renderGeminiProblems();
   updateStats();
+  updateGeminiStats();
   updateStreak();
   populateTagFilter();
+  populateGeminiTagFilter();
 
   // Start auth flow (checks token → auto-login or show login screen)
   AUTH.init();
@@ -276,10 +295,15 @@ function initMonaco() {
     state.editor.onDidChangeModelContent(() => {
       if (state.currentQuestion) {
         const key = `${state.currentQuestion.id}_${state.currentLanguage}`;
-        state.codeStore[key] = state.editor.getValue();
-        localStorage.setItem('cracktcs_code', JSON.stringify(state.codeStore));
-        clearTimeout(_saveTimer);
-        _saveTimer = setTimeout(() => AUTH.saveProgress(), 2000);
+        const codeStore = getActiveCodeStore();
+        codeStore[key] = state.editor.getValue();
+        if (state.activeContext === 'gemini') {
+          localStorage.setItem('gemini_code', JSON.stringify(state.geminiCodeStore));
+        } else {
+          localStorage.setItem('cracktcs_code', JSON.stringify(state.codeStore));
+          clearTimeout(_saveTimer);
+          _saveTimer = setTimeout(() => AUTH.saveProgress(), 2000);
+        }
       }
     });
 
@@ -323,6 +347,13 @@ function switchView(viewName) {
   }
 
   state.currentView = viewName;
+
+  // Track which context we're in for list views
+  if (viewName === 'gemini') {
+    state.activeContext = 'gemini';
+  } else if (viewName === 'problems') {
+    state.activeContext = 'main';
+  }
 
   // Refresh dashboard when opened
   if (viewName === 'dashboard') {
@@ -446,12 +477,132 @@ function populateTagFilter() {
   });
 }
 
+// ==================== GEMINI PYQ LIST ====================
+function renderGeminiProblems(filteredQuestions = null) {
+  const tbody = document.getElementById('gemini-problems-tbody');
+  if (!tbody) return;
+  const list = filteredQuestions || geminiQuestions;
+
+  tbody.innerHTML = list.map(q => {
+    const isSolved = state.geminiSolvedSet.has(q.id);
+    const diffClass = q.difficulty.toLowerCase();
+    const displayId = q.id.replace('g', '');
+    return `
+      <tr data-id="${q.id}">
+        <td class="col-status">
+          <span class="status-icon ${isSolved ? 'solved' : 'unsolved'}">
+            ${isSolved ? '<i class="fas fa-check-circle"></i>' : '<i class="far fa-circle"></i>'}
+          </span>
+        </td>
+        <td class="col-id">${displayId}</td>
+        <td class="col-title">
+          <span class="problem-title-link">${q.title}</span>
+        </td>
+        <td class="col-category"><span class="cat-label">${q.category}</span></td>
+        <td class="col-difficulty">
+          <span class="diff-label ${diffClass}">${q.difficulty}</span>
+        </td>
+        <td class="col-tags">
+          <div class="tag-chips">
+            ${q.tags.slice(0, 3).map(t => `<span class="tag-chip">${t}</span>`).join('')}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Add click handlers
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.addEventListener('click', () => {
+      const id = row.dataset.id;
+      openProblem(id, 'gemini');
+    });
+  });
+
+  updateGeminiStats(list);
+}
+
+function updateGeminiStats(list = geminiQuestions) {
+  const totalEl = document.getElementById('gemini-stat-total');
+  if (!totalEl) return;
+
+  const total = list.length;
+  const easy = list.filter(q => q.difficulty === 'Easy').length;
+  const medium = list.filter(q => q.difficulty === 'Medium').length;
+  const hard = list.filter(q => q.difficulty === 'Hard').length;
+  const solved = list.filter(q => state.geminiSolvedSet.has(q.id)).length;
+
+  document.getElementById('gemini-stat-total').textContent = total;
+  document.getElementById('gemini-stat-easy').textContent = easy;
+  document.getElementById('gemini-stat-medium').textContent = medium;
+  document.getElementById('gemini-stat-hard').textContent = hard;
+  document.getElementById('gemini-stat-solved').textContent = solved;
+  document.getElementById('gemini-hero-total').textContent = geminiQuestions.length;
+}
+
+function initGeminiFilters() {
+  const searchInput = document.getElementById('gemini-search-input');
+  const categoryFilter = document.getElementById('gemini-category-filter');
+  const difficultyFilter = document.getElementById('gemini-difficulty-filter');
+  const statusFilter = document.getElementById('gemini-status-filter');
+  const tagFilter = document.getElementById('gemini-tag-filter');
+
+  if (!searchInput) return;
+
+  const applyFilters = () => {
+    const search = searchInput.value.toLowerCase().trim();
+    const category = categoryFilter.value;
+    const difficulty = difficultyFilter.value;
+    const status = statusFilter.value;
+    const tag = tagFilter.value;
+
+    let filtered = geminiQuestions.filter(q => {
+      if (search && !q.title.toLowerCase().includes(search) &&
+          !q.tags.some(t => t.toLowerCase().includes(search)) &&
+          !q.id.toString().includes(search)) {
+        return false;
+      }
+      if (category !== 'all' && q.category !== category) return false;
+      if (difficulty !== 'all' && q.difficulty !== difficulty) return false;
+      if (status === 'solved' && !state.geminiSolvedSet.has(q.id)) return false;
+      if (status === 'unsolved' && state.geminiSolvedSet.has(q.id)) return false;
+      if (tag !== 'all' && !q.tags.includes(tag)) return false;
+      return true;
+    });
+
+    renderGeminiProblems(filtered);
+  };
+
+  searchInput.addEventListener('input', applyFilters);
+  categoryFilter.addEventListener('change', applyFilters);
+  difficultyFilter.addEventListener('change', applyFilters);
+  statusFilter.addEventListener('change', applyFilters);
+  tagFilter.addEventListener('change', applyFilters);
+}
+
+function populateGeminiTagFilter() {
+  const tagFilter = document.getElementById('gemini-tag-filter');
+  if (!tagFilter) return;
+  const tags = [...new Set(geminiQuestions.flatMap(q => q.tags))].sort();
+  tags.forEach(tag => {
+    const opt = document.createElement('option');
+    opt.value = tag;
+    opt.textContent = tag;
+    tagFilter.appendChild(opt);
+  });
+}
+
 // ==================== SOLVE VIEW ====================
 function initSolveView() {
-  // Back button
+  // Back button — return to the correct list based on which context we came from
   document.getElementById('back-btn').addEventListener('click', () => {
-    switchView('problems');
-    renderProblems();
+    if (state.activeContext === 'gemini') {
+      switchView('gemini');
+      renderGeminiProblems();
+    } else {
+      switchView('problems');
+      renderProblems();
+    }
   });
 
   // Prev/Next
@@ -471,11 +622,16 @@ function initSolveView() {
       const lang = state.currentLanguage;
       const code = q.starterCode[lang] || '// No starter code for this language';
       state.editor.setValue(code);
-      // Clear stored code
+      // Clear stored code from context-appropriate store
       const key = `${q.id}_${lang}`;
-      delete state.codeStore[key];
-      localStorage.setItem('cracktcs_code', JSON.stringify(state.codeStore));
-      AUTH.saveProgress();
+      const codeStore = getActiveCodeStore();
+      delete codeStore[key];
+      if (state.activeContext === 'gemini') {
+        localStorage.setItem('gemini_code', JSON.stringify(state.geminiCodeStore));
+      } else {
+        localStorage.setItem('cracktcs_code', JSON.stringify(state.codeStore));
+        AUTH.saveProgress();
+      }
       showToast('Code reset to starter template', 'info');
     }
   });
@@ -535,8 +691,16 @@ function initSolveView() {
   });
 }
 
-function openProblem(id) {
-  const q = questions.find(q => q.id === id);
+function openProblem(id, context) {
+  // Determine context from the id or explicit parameter
+  if (context) {
+    state.activeContext = context;
+  } else if (typeof id === 'string' && id.startsWith('g')) {
+    state.activeContext = 'gemini';
+  }
+
+  const qList = getActiveQuestions();
+  const q = qList.find(q => q.id === id);
   if (!q) return;
 
   state.currentQuestion = q;
@@ -546,8 +710,9 @@ function openProblem(id) {
   switchView('solve');
 
   // Populate problem info
-  document.getElementById('problem-title').textContent = `${q.id}. ${q.title}`;
-  document.getElementById('problem-nav-title').textContent = `${q.id} / ${questions.length}`;
+  const displayId = typeof q.id === 'string' ? q.id.replace('g', '') : q.id;
+  document.getElementById('problem-title').textContent = `${displayId}. ${q.title}`;
+  document.getElementById('problem-nav-title').textContent = `${displayId} / ${qList.length}`;
 
   // Difficulty badge
   const diffBadge = document.getElementById('problem-difficulty');
@@ -577,7 +742,11 @@ function openProblem(id) {
   }
 
   // Reset result panel
-  document.getElementById('execution-result').innerHTML = `<p class="result-placeholder">Run or Submit your code to see results here.</p>`;
+  let placeholder = 'Run or Submit your code to see results here.';
+  if (q.hiddenTests && q.hiddenTests.length > 0) {
+    placeholder = `Run or Submit your code. Submit runs ${q.examples.length} visible + ${q.hiddenTests.length} hidden tests.`;
+  }
+  document.getElementById('execution-result').innerHTML = `<p class="result-placeholder">${placeholder}</p>`;
 
   // Switch to description tab
   document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
@@ -627,6 +796,15 @@ function renderDescription(q) {
       html += `<li><code>${escapeHtml(c)}</code></li>`;
     });
     html += '</ul>';
+  }
+
+  // Hidden test info for Gemini questions
+  if (q.hiddenTests && q.hiddenTests.length > 0) {
+    html += `
+      <div class="hidden-test-info">
+        <i class="fas fa-eye-slash"></i>
+        <span>This problem has <strong>${q.hiddenTests.length} hidden test cases</strong> that will be checked when you Submit.</span>
+      </div>`;
   }
 
   document.getElementById('problem-description').innerHTML = html;
@@ -688,8 +866,9 @@ function loadEditorCode() {
   const lang = state.currentLanguage;
   const key = `${q.id}_${lang}`;
 
-  // Check for stored code first
-  const storedCode = state.codeStore[key];
+  // Check for stored code first (use context-appropriate code store)
+  const codeStore = getActiveCodeStore();
+  const storedCode = codeStore[key];
   const code = storedCode || q.starterCode[lang] || `// No starter code for ${lang}`;
 
   // Set Monaco language
@@ -701,10 +880,11 @@ function loadEditorCode() {
 
 function navigateProblem(direction) {
   if (!state.currentQuestion) return;
-  const currentIndex = questions.findIndex(q => q.id === state.currentQuestion.id);
+  const qList = getActiveQuestions();
+  const currentIndex = qList.findIndex(q => q.id === state.currentQuestion.id);
   const newIndex = currentIndex + direction;
-  if (newIndex >= 0 && newIndex < questions.length) {
-    openProblem(questions[newIndex].id);
+  if (newIndex >= 0 && newIndex < qList.length) {
+    openProblem(qList[newIndex].id);
   }
 }
 
@@ -793,6 +973,9 @@ async function runSingleExecution(code, lang, input, resultDiv) {
 
 async function runAgainstExamples(code, lang, question, resultDiv) {
   const examples = question.examples;
+  const hiddenTests = question.hiddenTests || [];
+  const totalTests = (examples ? examples.length : 0) + hiddenTests.length;
+
   if (!examples || examples.length === 0) {
     resultDiv.innerHTML = `<p class="result-placeholder">No test cases available for this problem.</p>`;
     return;
@@ -801,8 +984,11 @@ async function runAgainstExamples(code, lang, question, resultDiv) {
   let allPassed = true;
   let html = '';
   let passCount = 0;
+  let testNum = 0;
 
+  // Run visible examples
   for (let i = 0; i < examples.length; i++) {
+    testNum++;
     const ex = examples[i];
     const input = cleanExampleInput(ex.input);
     const expectedRaw = String(ex.output).replace(/^"|"$/g, '').trim();
@@ -815,7 +1001,7 @@ async function runAgainstExamples(code, lang, question, resultDiv) {
         html += `
           <div class="test-result-card fail">
             <div class="test-result-header">
-              <span class="test-result-status fail">❌ Test ${i + 1} — Runtime Error</span>
+              <span class="test-result-status fail">❌ Test ${testNum} — Runtime Error</span>
             </div>
             <div class="test-result-body">
               <div class="test-result-row">
@@ -838,7 +1024,7 @@ async function runAgainstExamples(code, lang, question, resultDiv) {
         html += `
           <div class="test-result-card ${passed ? 'pass' : 'fail'}">
             <div class="test-result-header">
-              <span class="test-result-status ${passed ? 'pass' : 'fail'}">${passed ? '✅' : '❌'} Test ${i + 1} — ${passed ? 'Passed' : 'Failed'}</span>
+              <span class="test-result-status ${passed ? 'pass' : 'fail'}">${passed ? '✅' : '❌'} Test ${testNum} — ${passed ? 'Passed' : 'Failed'}</span>
             </div>
             <div class="test-result-body">
               <div class="test-result-row">
@@ -861,7 +1047,71 @@ async function runAgainstExamples(code, lang, question, resultDiv) {
       html += `
         <div class="test-result-card fail">
           <div class="test-result-header">
-            <span class="test-result-status fail">❌ Test ${i + 1} — Error</span>
+            <span class="test-result-status fail">❌ Test ${testNum} — Error</span>
+          </div>
+          <div class="test-result-body">
+            <div class="test-result-row">
+              <span class="test-result-label">Error:</span>
+              <span class="test-result-value">${escapeHtml(err.message || 'Execution failed')}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+
+  // Run hidden tests (if any)
+  for (let i = 0; i < hiddenTests.length; i++) {
+    testNum++;
+    const ht = hiddenTests[i];
+    const input = cleanExampleInput(ht.input);
+    const expectedRaw = String(ht.output).replace(/^"|"$/g, '').trim();
+
+    try {
+      const result = await executeCode(code, lang, input);
+
+      if (result.error) {
+        allPassed = false;
+        html += `
+          <div class="test-result-card hidden-test fail">
+            <div class="test-result-header">
+              <span class="test-result-status fail">❌ Test ${testNum} — Runtime Error</span>
+              <span class="hidden-test-label"><i class="fas fa-eye-slash"></i> Hidden</span>
+            </div>
+            <div class="test-result-body">
+              <div class="test-result-row">
+                <span class="test-result-label">Error:</span>
+                <span class="test-result-value">${escapeHtml(result.error)}</span>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        const actualOutput = result.output.trim();
+        const passed = actualOutput === expectedRaw;
+
+        if (!passed) allPassed = false;
+        if (passed) passCount++;
+
+        html += `
+          <div class="test-result-card hidden-test ${passed ? 'pass' : 'fail'}">
+            <div class="test-result-header">
+              <span class="test-result-status ${passed ? 'pass' : 'fail'}">${passed ? '✅' : '❌'} Test ${testNum} — ${passed ? 'Passed' : 'Failed'}</span>
+              <span class="hidden-test-label"><i class="fas fa-eye-slash"></i> Hidden</span>
+            </div>
+            <div class="test-result-body">
+              <div class="test-result-row">
+                <span class="test-result-label">Status:</span>
+                <span class="test-result-value">${passed ? 'Output matches expected' : 'Output does not match expected'}</span>
+              </div>
+            </div>
+          </div>`;
+      }
+    } catch (err) {
+      allPassed = false;
+      html += `
+        <div class="test-result-card hidden-test fail">
+          <div class="test-result-header">
+            <span class="test-result-status fail">❌ Test ${testNum} — Error</span>
+            <span class="hidden-test-label"><i class="fas fa-eye-slash"></i> Hidden</span>
           </div>
           <div class="test-result-body">
             <div class="test-result-row">
@@ -874,9 +1124,16 @@ async function runAgainstExamples(code, lang, question, resultDiv) {
   }
 
   const overallClass = allPassed ? 'accepted' : 'rejected';
-  const overallText = allPassed
-    ? `🎉 Accepted — All ${examples.length} tests passed!`
-    : `❌ Wrong Answer — ${passCount}/${examples.length} tests passed`;
+  let overallText;
+  if (hiddenTests.length > 0) {
+    overallText = allPassed
+      ? `🎉 Accepted — All ${totalTests} tests passed! (${examples.length} visible + ${hiddenTests.length} hidden)`
+      : `❌ Wrong Answer — ${passCount}/${totalTests} tests passed`;
+  } else {
+    overallText = allPassed
+      ? `🎉 Accepted — All ${examples.length} tests passed!`
+      : `❌ Wrong Answer — ${passCount}/${examples.length} tests passed`;
+  }
 
   resultDiv.innerHTML = `<div class="overall-result ${overallClass}">${overallText}</div>${html}`;
 
@@ -936,30 +1193,37 @@ async function executeCode(code, language, input = '') {
 
 // ==================== PROGRESS TRACKING ====================
 function markSolved(questionId) {
-  if (state.solvedSet.has(questionId)) return;
+  const isGemini = typeof questionId === 'string' && questionId.startsWith('g');
 
-  state.solvedSet.add(questionId);
-  localStorage.setItem('cracktcs_solved', JSON.stringify([...state.solvedSet]));
+  if (isGemini) {
+    if (state.geminiSolvedSet.has(questionId)) return;
+    state.geminiSolvedSet.add(questionId);
+    localStorage.setItem('gemini_solved', JSON.stringify([...state.geminiSolvedSet]));
+    const q = geminiQuestions.find(q => q.id === questionId);
+    updateGeminiStats();
+    showToast(`🎉 Problem "${q?.title}" solved!`, 'success');
+  } else {
+    if (state.solvedSet.has(questionId)) return;
+    state.solvedSet.add(questionId);
+    localStorage.setItem('cracktcs_solved', JSON.stringify([...state.solvedSet]));
 
-  // Update recent solved
-  const q = questions.find(q => q.id === questionId);
-  if (q) {
-    state.recentSolved = state.recentSolved.filter(r => r.id !== questionId);
-    state.recentSolved.unshift({ id: q.id, title: q.title, difficulty: q.difficulty, date: new Date().toISOString() });
-    if (state.recentSolved.length > 20) state.recentSolved.pop();
-    localStorage.setItem('cracktcs_recent', JSON.stringify(state.recentSolved));
+    const q = questions.find(q => q.id === questionId);
+    if (q) {
+      state.recentSolved = state.recentSolved.filter(r => r.id !== questionId);
+      state.recentSolved.unshift({ id: q.id, title: q.title, difficulty: q.difficulty, date: new Date().toISOString() });
+      if (state.recentSolved.length > 20) state.recentSolved.pop();
+      localStorage.setItem('cracktcs_recent', JSON.stringify(state.recentSolved));
+    }
+
+    updateStats();
+    showToast(`🎉 Problem "${q?.title}" solved!`, 'success');
   }
 
-  // Update streak
+  // Update streak (shared)
   updateStreak(true);
 
-  // Sync to server
+  // Sync main progress to server
   AUTH.saveProgress();
-
-  // Update nav stats
-  updateStats();
-
-  showToast(`🎉 Problem "${q.title}" solved!`, 'success');
 }
 
 function updateStreak(justSolved = false) {
@@ -1053,10 +1317,10 @@ function renderDashboard() {
   document.getElementById('dash-medium').textContent = `${medSolved}/${difficultyStats.Medium}`;
   document.getElementById('dash-hard').textContent = `${hardSolved}/${difficultyStats.Hard}`;
 
-  // Category breakdown
+  // Category breakdown (main + gemini)
   const catBars = document.getElementById('category-bars');
-  const cats = [...new Set(questions.map(q => q.category))];
-  catBars.innerHTML = cats.map(cat => {
+  const mainCats = [...new Set(questions.map(q => q.category))];
+  let catsHtml = mainCats.map(cat => {
     const catTotal = questions.filter(q => q.category === cat).length;
     const catSolved = questions.filter(q => q.category === cat && state.solvedSet.has(q.id)).length;
     const pct = catTotal > 0 ? Math.round((catSolved / catTotal) * 100) : 0;
@@ -1071,6 +1335,30 @@ function renderDashboard() {
         </div>
       </div>`;
   }).join('');
+
+  // Gemini section
+  const geminiSolvedCount = state.geminiSolvedSet.size;
+  const geminiTotal = geminiQuestions.length;
+  if (geminiTotal > 0) {
+    catsHtml += `<h3 style="margin-top:20px;color:#a78bfa;"><i class="fas fa-gem"></i> Gemini PYQ — ${geminiSolvedCount}/${geminiTotal} solved</h3>`;
+    const geminiCats = [...new Set(geminiQuestions.map(q => q.category))];
+    catsHtml += geminiCats.map(cat => {
+      const catTotal = geminiQuestions.filter(q => q.category === cat).length;
+      const catSolved = geminiQuestions.filter(q => q.category === cat && state.geminiSolvedSet.has(q.id)).length;
+      const pct = catTotal > 0 ? Math.round((catSolved / catTotal) * 100) : 0;
+      return `
+        <div class="cat-bar-item">
+          <div class="cat-bar-header">
+            <span class="cat-bar-name">${cat}</span>
+            <span class="cat-bar-count">${catSolved} / ${catTotal}</span>
+          </div>
+          <div class="cat-bar-track">
+            <div class="cat-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, #a78bfa, #7c3aed);"></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+  catBars.innerHTML = catsHtml;
 
   // Recent solved
   const recentList = document.getElementById('recent-list');

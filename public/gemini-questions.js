@@ -1,7 +1,7 @@
 const geminiQuestions = [
   // ==================== NQT / Advanced Coding ====================
   {
-    id: 1,
+    id: "g1",
     title: "Count Subsets with Given Sum",
     difficulty: "Medium",
     category: "NQT",
@@ -103,7 +103,7 @@ for _ in range(t):
     print(dp[s])`
   },
   {
-    id: 2,
+    id: "g2",
     title: "Typewriter Backspace Challenge",
     difficulty: "Easy",
     category: "NQT",
@@ -183,7 +183,7 @@ alice = input()
 print("YES" if process(bob) == process(alice) else "NO")`
   },
   {
-    id: 3,
+    id: "g3",
     title: "Valid Star-Hash String",
     difficulty: "Easy",
     category: "NQT",
@@ -252,7 +252,7 @@ hashes = s.count('#')
 print(stars - hashes)`
   },
   {
-    id: 4,
+    id: "g4",
     title: "Two Wheeler and Four Wheeler",
     difficulty: "Easy",
     category: "NQT",
@@ -339,7 +339,7 @@ else:
         print(tw, fw)`
   },
   {
-    id: 5,
+    id: "g5",
     title: "Print Primes in Range",
     difficulty: "Easy",
     category: "NQT",
@@ -406,7 +406,7 @@ res = [str(x) for x in range(l, r+1) if is_prime(x)]
 print(' '.join(res))`
   },
   {
-    id: 6,
+    id: "g6",
     title: "Max Sum of Two Non-Overlapping Subarrays",
     difficulty: "Hard",
     category: "NQT",
@@ -487,7 +487,7 @@ for j in range(k, n - k + 1):
 print(ans)`
   },
   {
-    id: 7,
+    id: "g7",
     title: "Words to Number Conversion",
     difficulty: "Medium",
     category: "NQT",
@@ -592,7 +592,7 @@ for _ in range(t):
 
   // ==================== CodeVita ====================
   {
-    id: 8,
+    id: "g8",
     title: "Philaland Coin Denominations",
     difficulty: "Medium",
     category: "CodeVita",
@@ -677,7 +677,7 @@ for _ in range(t):
     print(math.ceil(math.log2(n + 1)))`
   },
   {
-    id: 9,
+    id: "g9",
     title: "Dole Out Cadbury",
     difficulty: "Medium",
     category: "CodeVita",
@@ -775,7 +775,7 @@ for l in range(p, q + 1):
 print(total)`
   },
   {
-    id: 10,
+    id: "g10",
     title: "Submission Queue Maximum Size",
     difficulty: "Medium",
     category: "CodeVita",
@@ -858,7 +858,7 @@ for t in arr:
 print(max_size)`
   },
   {
-    id: 11,
+    id: "g11",
     title: "Maximum Moons in a Solar System",
     difficulty: "Easy",
     category: "CodeVita",
@@ -923,7 +923,7 @@ for i in range(n):
 print(max_moons)`
   },
   {
-    id: 12,
+    id: "g12",
     title: "Toy Product IDs and Sizes Recovery",
     difficulty: "Easy",
     category: "CodeVita",
@@ -996,7 +996,7 @@ for i in range(n):
 print(' '.join(result))`
   },
   {
-    id: 13,
+    id: "g13",
     title: "Minimum Movements to Sit Together",
     difficulty: "Hard",
     category: "CodeVita",
@@ -1083,7 +1083,7 @@ else:
     print(min_moves, ways)`
   },
   {
-    id: 14,
+    id: "g14",
     title: "Smallest Missing Positive Integer",
     difficulty: "Easy",
     category: "CodeVita",
@@ -1158,7 +1158,7 @@ print(i)`
 
   // ==================== Digital ====================
   {
-    id: 15,
+    id: "g15",
     title: "Nearest Larger Permutation Number",
     difficulty: "Hard",
     category: "Digital",
@@ -1231,7 +1231,7 @@ for p in perms:
 print(result)`
   },
   {
-    id: 16,
+    id: "g16",
     title: "Oddly Even",
     difficulty: "Easy",
     category: "Digital",
@@ -1297,7 +1297,7 @@ even_sum = sum(int(s[i]) for i in range(1, len(s), 2))
 print(abs(odd_sum - even_sum))`
   },
   {
-    id: 17,
+    id: "g17",
     title: "Busiest Parking Row",
     difficulty: "Easy",
     category: "Digital",
@@ -1365,7 +1365,7 @@ for i in range(r):
 print(max_row)`
   },
   {
-    id: 18,
+    id: "g18",
     title: "Odd Balloon Color",
     difficulty: "Easy",
     category: "Digital",
@@ -1435,7 +1435,7 @@ for color, count in cnt.items():
         break`
   },
   {
-    id: 19,
+    id: "g19",
     title: "Sweet Seventeen (Base 17 to Decimal)",
     difficulty: "Easy",
     category: "Digital",
@@ -1506,7 +1506,7 @@ for c in s:
 print(result)`
   },
   {
-    id: 20,
+    id: "g20",
     title: "Keyword or Not",
     difficulty: "Easy",
     category: "Digital",
@@ -1574,7 +1574,7 @@ else:
     print(f"{word} is not a keyword")`
   },
   {
-    id: 21,
+    id: "g21",
     title: "Nth Term of Mixed Series",
     difficulty: "Medium",
     category: "Digital",
@@ -1646,7 +1646,7 @@ else:
     print(3 ** ((n - 2) // 2))`
   },
   {
-    id: 22,
+    id: "g22",
     title: "Word Transformer",
     difficulty: "Easy",
     category: "Digital",
@@ -1725,7 +1725,7 @@ r3 = w3.upper()
 print(r1 + r2 + r3)`
   },
   {
-    id: 23,
+    id: "g23",
     title: "Fibonacci-Prime Mixed Series",
     difficulty: "Medium",
     category: "Digital",
@@ -1820,7 +1820,7 @@ else:
 
   // ==================== TAG ====================
   {
-    id: 24,
+    id: "g24",
     title: "Unique Permutations with Character Counts",
     difficulty: "Hard",
     category: "TAG",
@@ -1893,7 +1893,7 @@ for r in result:
     print(r)`
   },
   {
-    id: 25,
+    id: "g25",
     title: "Mike's Startup Party (Table Arrangement)",
     difficulty: "Hard",
     category: "Ninja",
@@ -1981,7 +1981,7 @@ for i in range(1, n + 1):
 print(dp[n])`
   },
   {
-    id: 26,
+    id: "g26",
     title: "Max A-Count Between Two Sets",
     difficulty: "Easy",
     category: "NQT",
@@ -2046,7 +2046,7 @@ for _ in range(n):
 print(max_a)`
   },
   {
-    id: 27,
+    id: "g27",
     title: "Remove Brackets from Expression",
     difficulty: "Medium",
     category: "TAG",
@@ -2140,7 +2140,7 @@ if res.startswith('+'):
 print(res)`
   },
   {
-    id: 28,
+    id: "g28",
     title: "Orchard Apple Trees",
     difficulty: "Hard",
     category: "CodeVita",

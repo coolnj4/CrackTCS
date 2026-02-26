@@ -129,7 +129,7 @@
 }
 
 /* Nav link active override for Gemini */
-.nav-link.active {
+.nav-link[data-view="gemini"].active {
     color: #a78bfa;
     border-bottom-color: #a78bfa;
 }

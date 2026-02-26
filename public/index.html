@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CrackTCS — Master Every TCS Coding Question</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gemini-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
@@ -19,7 +20,7 @@
         </div>
         <div class="nav-center">
             <a href="#" class="nav-link active" data-view="problems"><i class="fas fa-list"></i> Problems</a>
-            <a href="gemini.html" class="nav-link"><i class="fas fa-gem"></i> Gemini PYQ</a>
+            <a href="#" class="nav-link" data-view="gemini"><i class="fas fa-gem"></i> Gemini PYQ</a>
             <a href="#" class="nav-link" data-view="dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a>
         </div>
         <div class="nav-right">
@@ -211,6 +212,90 @@
         </div>
     </div>
 
+    <!-- ============ GEMINI PYQ VIEW ============ -->
+    <div id="gemini-view" class="view">
+        <div class="gemini-hero">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="hero-crack">Gemini</span><span class="hero-tcs">PYQ</span>
+                </h1>
+                <p class="hero-subtitle">Previous Year Questions — NQT, CodeVita, Digital, TAG & Ninja</p>
+                <span class="gemini-badge"><i class="fas fa-eye-slash"></i> Hidden Test Cases Included</span>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="hero-stat-num" id="gemini-hero-total">28</span>
+                        <span class="hero-stat-label">Questions</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">5</span>
+                        <span class="hero-stat-label">Categories</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="hero-stat-num">4</span>
+                        <span class="hero-stat-label">Languages</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="problems-container">
+            <div class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="gemini-search-input" placeholder="Search Gemini questions...">
+                </div>
+                <div class="filter-group">
+                    <select id="gemini-category-filter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="NQT">NQT</option>
+                        <option value="CodeVita">CodeVita</option>
+                        <option value="Digital">Digital</option>
+                        <option value="TAG">TAG</option>
+                        <option value="Ninja">Ninja</option>
+                    </select>
+                    <select id="gemini-difficulty-filter" class="filter-select">
+                        <option value="all">All Difficulty</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                    <select id="gemini-status-filter" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="solved">✅ Solved</option>
+                        <option value="unsolved">⬜ Unsolved</option>
+                    </select>
+                    <select id="gemini-tag-filter" class="filter-select">
+                        <option value="all">All Topics</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-pill total"><span id="gemini-stat-total">0</span> Total</div>
+                <div class="stat-pill easy"><span id="gemini-stat-easy">0</span> Easy</div>
+                <div class="stat-pill medium"><span id="gemini-stat-medium">0</span> Medium</div>
+                <div class="stat-pill hard"><span id="gemini-stat-hard">0</span> Hard</div>
+                <div class="stat-pill solved"><span id="gemini-stat-solved">0</span> Solved</div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="problems-table">
+                    <thead>
+                        <tr>
+                            <th class="col-status">Status</th>
+                            <th class="col-id">#</th>
+                            <th class="col-title">Title</th>
+                            <th class="col-category">Category</th>
+                            <th class="col-difficulty">Difficulty</th>
+                            <th class="col-tags">Tags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gemini-problems-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- ============ DASHBOARD VIEW ============ -->
     <div id="dashboard-view" class="view">
         <div class="dashboard-container">
@@ -297,6 +382,7 @@
 
     <!-- Scripts -->
     <script src="questions.js"></script>
+    <script src="gemini-questions.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <script src="app.js"></script>
 </body>
