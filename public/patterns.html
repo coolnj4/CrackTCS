@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Common Problem Patterns — CrackTCS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #1a1a2e;
+            color: #eff1f6;
+            min-height: 100vh;
+        }
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; height: 56px;
+            background: rgba(22, 33, 62, 0.95); border-bottom: 1px solid #2a2a4a;
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+        }
+        .logo { text-decoration: none; font-size: 1.3rem; font-weight: 800; }
+        .logo-bracket { color: #e94560; } .logo-text { color: #eff1f6; } .logo-highlight { color: #e94560; }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
+            color: #8b8fa3; text-decoration: none; padding: 8px 16px;
+            border-radius: 8px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #eff1f6; background: #252547; }
+        .hero {
+            text-align: center; padding: 48px 24px 32px;
+            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+        }
+        .hero h1 { font-size: 2.2rem; margin-bottom: 8px; }
+        .hero h1 span { color: #e94560; }
+        .hero p { color: #8b8fa3; font-size: 1rem; max-width: 600px; margin: 0 auto; }
+        .pattern-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 20px; padding: 32px 24px 60px; max-width: 1600px; margin: 0 auto;
+        }
+        .pattern-card {
+            background: #16213e; border: 1px solid #2a2a4a; border-radius: 12px;
+            overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pattern-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .pattern-header {
+            padding: 16px 20px; display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .pattern-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .pattern-header h3 { font-size: 1rem; font-weight: 700; }
+        .pattern-header .count {
+            margin-left: auto; background: rgba(233, 69, 96, 0.15);
+            color: #e94560; padding: 2px 10px; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+        }
+        .key-idea {
+            padding: 10px 20px; background: rgba(46, 196, 182, 0.05);
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .key-idea-label {
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #2cbb5d; font-weight: 700; margin-bottom: 4px;
+        }
+        .key-idea p {
+            font-size: 0.82rem; color: #c0c4d6; line-height: 1.55;
+        }
+        .pattern-questions { padding: 12px 20px 16px; }
+        .pq-item {
+            display: flex; align-items: flex-start; gap: 8px;
+            padding: 6px 0; border-bottom: 1px solid rgba(42, 42, 74, 0.5);
+            font-size: 0.8rem;
+        }
+        .pq-item:last-child { border-bottom: none; }
+        .pq-id {
+            color: #5c5f73; font-weight: 600; min-width: 30px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; padding-top: 2px;
+        }
+        .pq-title { color: #4fc3f7; font-weight: 500; flex: 1; }
+        .pq-diff {
+            font-size: 0.68rem; font-weight: 600; padding: 1px 8px;
+            border-radius: 4px; white-space: nowrap;
+        }
+        .pq-diff.Easy { color: #2cbb5d; background: rgba(44, 187, 93, 0.1); }
+        .pq-diff.Medium { color: #ffc01e; background: rgba(255, 192, 30, 0.1); }
+        .pq-diff.Hard { color: #ef4743; background: rgba(239, 71, 67, 0.1); }
+        .toc {
+            padding: 16px 24px; display: flex; flex-wrap: wrap; gap: 8px;
+            border-bottom: 1px solid #2a2a4a;
+            position: sticky; top: 56px; z-index: 50;
+            background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(12px);
+        }
+        .toc a {
+            color: #8b8fa3; text-decoration: none; padding: 5px 12px;
+            border-radius: 6px; font-size: 0.78rem; font-weight: 500;
+            background: rgba(37, 37, 71, 0.5); border: 1px solid #2a2a4a; transition: all 0.2s;
+        }
+        .toc a:hover { color: #eff1f6; background: #252547; border-color: #e94560; }
+        .back-top {
+            position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px;
+            background: #e94560; color: #fff; border: none; border-radius: 50%;
+            cursor: pointer; font-size: 1.1rem; display: none; z-index: 999;
+            box-shadow: 0 4px 16px rgba(233, 69, 96, 0.4); transition: all 0.2s;
+        }
+        .back-top:hover { transform: scale(1.1); }
+        .back-top.show { display: flex; align-items: center; justify-content: center; }
+        @media (max-width: 768px) {
+            .pattern-grid { grid-template-columns: 1fr; padding: 16px; }
+            .hero h1 { font-size: 1.5rem; }
+            .toc { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-text">Crack</span><span class="logo-highlight">TCS</span><span class="logo-bracket">/&gt;</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-list"></i> Problems</a>
+            <a href="quick-revision.html"><i class="fas fa-bolt"></i> Quick Revision</a>
+            <a href="patterns.html" class="active"><i class="fas fa-puzzle-piece"></i> Patterns</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1><i class="fas fa-puzzle-piece"></i> Common Problem <span>Patterns</span></h1>
+        <p>Questions grouped by solving pattern — Master the technique, solve any variant</p>
+    </div>
+
+    <div class="toc" id="toc"></div>
+
+    <div class="pattern-grid" id="pattern-grid"></div>
+
+    <button class="back-top" id="back-top" title="Back to top"><i class="fas fa-arrow-up"></i></button>
+
+    <script src="questions.js"></script>
+    <script src="gemini-questions.js"></script>
+    <script>
+    // ===== PATTERN DEFINITIONS =====
+    const patterns = [
+        {
+            name: "Digit Manipulation",
+            icon: "🔢", color: "#4fc3f7",
+            keyIdea: "Extract digits using % 10 and // 10 (or convert to string). Common tasks: sum digits, reverse digits, check digit properties. String conversion is often cleaner in Python.",
+            questionIds: [1, 2, 3, 10, 21, 56, 57, 73, "g16"]
+        },
+        {
+            name: "Prime Numbers & Factors",
+            icon: "🧮", color: "#a78bfa",
+            keyIdea: "Check primality by testing divisors up to √N. Use Sieve of Eratosthenes for ranges. Prime factorization: repeatedly divide by smallest factor. GCD via Euclidean algorithm, LCM = a×b/GCD.",
+            questionIds: [5, 6, 9, 11, 15, 26, "g5"]
+        },
+        {
+            name: "Fibonacci & Recursion Basics",
+            icon: "🌀", color: "#2cbb5d",
+            keyIdea: "Classic recursion patterns: F(n)=F(n-1)+F(n-2). Always prefer iterative DP to avoid exponential blowup. Sum(N)=N+Sum(N-1). Tower of Hanoi: move N-1, move largest, move N-1 back.",
+            questionIds: [7, 8, 37, 54, 77, "g23"]
+        },
+        {
+            name: "String Palindrome & Reversal",
+            icon: "🔄", color: "#ff6b6b",
+            keyIdea: "Palindrome: compare s == s[::-1]. For longest palindromic substring, expand from center (both odd and even). Reverse words: split → reverse list → join.",
+            questionIds: [3, 12, 17, 48]
+        },
+        {
+            name: "String Frequency & Character Counting",
+            icon: "📊", color: "#ffc01e",
+            keyIdea: "Build frequency map (dict/Counter). Use it to find: most frequent char, first unique char, anagram check, pangram check. Two-pass: build freq → scan for answer.",
+            questionIds: [4, 14, 18, 19, 20, 31, 50, 85, 86, "g3", "g18", "g26"]
+        },
+        {
+            name: "String Transformation & Encoding",
+            icon: "✂️", color: "#4ecdc4",
+            keyIdea: "Process each character with rules: Caesar cipher shifts by K (mod 26), run-length encoding counts consecutive chars, backspace (#) uses stack. String building with conditional logic.",
+            questionIds: [13, 22, 33, 61, 63, "g2", "g7", "g22"]
+        },
+        {
+            name: "Array Search & Missing Element",
+            icon: "🔍", color: "#e94560",
+            keyIdea: "Missing number: expected sum − actual sum. Single unique element: XOR all (pairs cancel). Two-sum: use hash set for O(N). Binary search on sorted/rotated arrays.",
+            questionIds: [25, 29, 46, 76, 90, "g14"]
+        },
+        {
+            name: "Array Sorting & Ordering",
+            icon: "📶", color: "#ff9f43",
+            keyIdea: "Know Bubble/Selection/Insertion sort for manual implementation. For derived problems: sort then access by index. Frequency sort needs custom key. Rank replacement: sort unique → map.",
+            questionIds: [23, 27, 47, 50, 83, 84]
+        },
+        {
+            name: "Array Subarray Problems",
+            icon: "📏", color: "#6c5ce7",
+            keyIdea: "Kadane's algorithm for max sum subarray. Track both max and min products for max product. Equilibrium: prefix sums. Key: these are about contiguous sequences, not subsequences.",
+            questionIds: [41, 71, 72, 80, "g6"]
+        },
+        {
+            name: "Sliding Window",
+            icon: "🪟", color: "#00b894",
+            keyIdea: "Fixed or variable-size window over array/string. Move right pointer to expand, left pointer to shrink. Used for: longest unique substring, max sum subarray of size K, time-window expiry.",
+            questionIds: [60, "g6", "g10"]
+        },
+        {
+            name: "Two Pointer / Pair Matching",
+            icon: "👆", color: "#fd79a8",
+            keyIdea: "Two pointers from ends moving inward (for sorted arrays) or hash map for O(1) complement lookup. Merging two sorted arrays: two-pointer merge step.",
+            questionIds: [29, 38, 39]
+        },
+        {
+            name: "Stack-Based Problems",
+            icon: "📚", color: "#a29bfe",
+            keyIdea: "Stack for: balanced brackets (push open, pop on close and match), next greater element (monotonic stack), backspace processing (pop on #), expression sign flipping.",
+            questionIds: [40, 43, 61, "g2", "g27"]
+        },
+        {
+            name: "Dynamic Programming — Classic",
+            icon: "🧩", color: "#e17055",
+            keyIdea: "Build solution from smaller subproblems. Key patterns: LCS (2D table match/skip), knapsack (take/skip), edit distance (insert/delete/replace), LIS (extend or start fresh). Always define state and transition.",
+            questionIds: [44, 45, 51, 53, 89]
+        },
+        {
+            name: "Dynamic Programming — Counting & Subset",
+            icon: "🎯", color: "#fdcb6e",
+            keyIdea: "Count ways: staircase (Fibonacci DP), subset sum (boolean DP), subset count (additive DP). Key: iterate items, update backwards for 0/1 problems.",
+            questionIds: [77, 78, "g1"]
+        },
+        {
+            name: "Greedy Algorithms",
+            icon: "💰", color: "#55efc4",
+            keyIdea: "Make locally optimal choice at each step. Stock buy-sell: track min price so far. Min jumps: track farthest reachable. Fleet counting: process by position, track slowest time.",
+            questionIds: [67, 74, 79]
+        },
+        {
+            name: "Matrix Operations",
+            icon: "🔲", color: "#74b9ff",
+            keyIdea: "Transpose: swap rows and columns. Multiplication: triple loop C[i][j]=Σ A[i][k]×B[k][j]. Spiral traversal: 4-direction walk with shrinking boundaries.",
+            questionIds: [28, 42, 49, "g11", "g17"]
+        },
+        {
+            name: "Backtracking",
+            icon: "🔙", color: "#fab1a0",
+            keyIdea: "Explore all possibilities recursively, undo choices that fail. N-Queens: place row by row, check col/diagonal conflicts. Permutations: swap elements, recurse, swap back.",
+            questionIds: [52, 59, "g24"]
+        },
+        {
+            name: "Binary Search (Modified)",
+            icon: "🎯", color: "#00cec9",
+            keyIdea: "Works on sorted (or partially sorted) data. Rotated array: determine which half is sorted, decide search direction. Always check arr[lo] <= arr[mid] to identify sorted half.",
+            questionIds: [46, 90]
+        },
+        {
+            name: "Bit Manipulation",
+            icon: "⚡", color: "#ffeaa7",
+            keyIdea: "XOR: a^a=0, a^0=a. Power of 2: n & (n-1) == 0. Binary conversion: divide by 2, collect remainders. Use bit tricks for O(1) checks.",
+            questionIds: [16, 30, 34, 76]
+        },
+        {
+            name: "Math & Number Theory",
+            icon: "🔬", color: "#dfe6e9",
+            keyIdea: "Leap year: (div 4 AND not 100) OR div 400. Fractions: cross-multiply and reduce by GCD. Perfect numbers: sum of proper divisors. Armstrong: sum of digits^k = N.",
+            questionIds: [9, 10, 21, 56, 57, 64, 87, 88, "g4", "g8", "g9", "g21"]
+        },
+        {
+            name: "Hashing & Frequency Maps",
+            icon: "#️⃣", color: "#b2bec3",
+            keyIdea: "Hash maps/sets for O(1) lookup. Subset check with Counter. Two-sum complement lookup. Frequency-based filtering. De-duplication with sets.",
+            questionIds: [13, 14, 29, 38, 65, 81, "g14", "g18"]
+        },
+        {
+            name: "Pattern Printing",
+            icon: "⭐", color: "#636e72",
+            keyIdea: "Nested loops: outer loop = rows, inner loop = columns. Right triangle: i stars in row i. Adjust spaces for centering. Think about what each cell should print.",
+            questionIds: [36]
+        },
+        {
+            name: "Graph & Shortest Path",
+            icon: "🗺️", color: "#0984e3",
+            keyIdea: "Dijkstra's for shortest path with non-negative weights: priority queue (min-heap), greedy relaxation. BFS for unweighted graphs.",
+            questionIds: [55]
+        },
+        {
+            name: "Wildcard & Pattern Matching",
+            icon: "🃏", color: "#d63031",
+            keyIdea: "DP table: pattern × text. '?' matches any single char, '*' matches any sequence (including empty). Key: * row inherits from same row (match more) or row above (match empty).",
+            questionIds: [82]
+        },
+        {
+            name: "Trapping Water & Intervals",
+            icon: "💧", color: "#0abde3",
+            keyIdea: "Trapping water: at each bar, water = min(left_max, right_max) − height. Precompute left_max[] and right_max[] arrays. Two-pointer approach saves O(N) space.",
+            questionIds: [75]
+        },
+        {
+            name: "Array Rotation & Rearrangement",
+            icon: "🔁", color: "#10ac84",
+            keyIdea: "Right rotate by K: take last K elements to front. Use K%N to handle K > N. In-place: reverse entire array, reverse first K, reverse rest. Interleaving: index-based merge.",
+            questionIds: [24, 66, 70, "g12", "g13"]
+        },
+        {
+            name: "Base & Number Conversion",
+            icon: "🔄", color: "#ee5a24",
+            keyIdea: "To decimal: process digits left to right with Horner's method (result = result × base + digit). From decimal: divide by target base, collect remainders.",
+            questionIds: [16, 30, 58, "g19"]
+        },
+        {
+            name: "Longest Common Subsequence & Substring",
+            icon: "🧬", color: "#6ab04c",
+            keyIdea: "LCS is a subsequence (skip allowed), NOT substring (must be contiguous). DP: match → diagonal+1, mismatch → max(left, top). Longest unique substring → sliding window.",
+            questionIds: [44, 60]
+        },
+        {
+            name: "Knapsack Variants",
+            icon: "🎒", color: "#f0932b",
+            keyIdea: "0/1 Knapsack: each item used once (iterate capacity backwards). Subset sum is boolean knapsack. Key: dp[w] = max value with capacity w. House robber is a linear knapsack.",
+            questionIds: [45, 78, 89, "g1"]
+        },
+    ];
+
+    // Build question lookup
+    const qMap = {};
+    questions.forEach(q => qMap[q.id] = q);
+    geminiQuestions.forEach(q => qMap[q.id] = q);
+
+    // Render TOC
+    const toc = document.getElementById('toc');
+    toc.innerHTML = patterns.map((p, i) =>
+        `<a href="#pattern-${i}">${p.icon} ${p.name}</a>`
+    ).join('');
+
+    // Render cards
+    const grid = document.getElementById('pattern-grid');
+    grid.innerHTML = patterns.map((p, i) => {
+        const qList = p.questionIds.map(id => {
+            const q = qMap[id];
+            if (!q) return '';
+            const displayId = String(id).startsWith('g') ? id.replace('g', 'G') : id;
+            return `<div class="pq-item">
+                <span class="pq-id">${displayId}</span>
+                <span class="pq-title">${q.title}</span>
+                <span class="pq-diff ${q.difficulty}">${q.difficulty}</span>
+            </div>`;
+        }).join('');
+
+        return `<div class="pattern-card" id="pattern-${i}">
+            <div class="pattern-header">
+                <div class="pattern-icon" style="background:${p.color}22;color:${p.color}">${p.icon}</div>
+                <h3 style="color:${p.color}">${p.name}</h3>
+                <span class="count">${p.questionIds.length} problems</span>
+            </div>
+            <div class="key-idea">
+                <div class="key-idea-label"><i class="fas fa-lightbulb"></i> Key Solving Idea</div>
+                <p>${p.keyIdea}</p>
+            </div>
+            <div class="pattern-questions">${qList}</div>
+        </div>`;
+    }).join('');
+
+    // Back to top
+    const btn = document.getElementById('back-top');
+    window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 400));
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    </script>
+</body>
+</html>

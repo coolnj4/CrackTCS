@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Revision — CrackTCS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #1a1a2e;
+            color: #eff1f6;
+            min-height: 100vh;
+        }
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px; height: 56px;
+            background: rgba(22, 33, 62, 0.95); border-bottom: 1px solid #2a2a4a;
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+        }
+        .logo { text-decoration: none; font-size: 1.3rem; font-weight: 800; }
+        .logo-bracket { color: #e94560; } .logo-text { color: #eff1f6; } .logo-highlight { color: #e94560; }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-links a {
+            color: #8b8fa3; text-decoration: none; padding: 8px 16px;
+            border-radius: 8px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: #eff1f6; background: #252547; }
+        .hero {
+            text-align: center; padding: 48px 24px 32px;
+            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+        }
+        .hero h1 { font-size: 2.2rem; margin-bottom: 8px; }
+        .hero h1 span { color: #e94560; }
+        .hero p { color: #8b8fa3; font-size: 1rem; }
+        .controls {
+            display: flex; gap: 12px; padding: 16px 24px; flex-wrap: wrap;
+            align-items: center; position: sticky; top: 56px; z-index: 50;
+            background: rgba(26, 26, 46, 0.95); backdrop-filter: blur(12px);
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .search-box {
+            display: flex; align-items: center; background: #12122a;
+            border: 1px solid #2a2a4a; border-radius: 8px; padding: 0 12px; flex: 1; min-width: 200px;
+        }
+        .search-box i { color: #5c5f73; margin-right: 8px; }
+        .search-box input {
+            background: transparent; border: none; color: #eff1f6;
+            padding: 10px 0; font-size: 0.85rem; width: 100%; outline: none;
+        }
+        .filter-select {
+            background: #12122a; color: #eff1f6; border: 1px solid #2a2a4a;
+            border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; cursor: pointer;
+        }
+        .filter-select option { background: #12122a; }
+        .table-container { padding: 0 16px 60px; overflow-x: auto; }
+        table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            font-size: 0.78rem; min-width: 1400px;
+        }
+        thead { position: sticky; top: 112px; z-index: 40; }
+        thead th {
+            background: #16213e; color: #8b8fa3; padding: 12px 10px;
+            text-align: left; font-weight: 600; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 2px solid #e94560;
+            white-space: nowrap;
+        }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:hover { background: #252547; }
+        tbody tr:nth-child(even) { background: rgba(30, 30, 58, 0.5); }
+        tbody tr:nth-child(even):hover { background: #252547; }
+        tbody td {
+            padding: 10px 10px; border-bottom: 1px solid #2a2a4a;
+            vertical-align: top; line-height: 1.5;
+        }
+        .col-id { width: 35px; color: #5c5f73; font-weight: 600; text-align: center; }
+        .col-title { min-width: 160px; font-weight: 600; color: #4fc3f7; }
+        .col-question { min-width: 180px; color: #eff1f6; }
+        .col-oneline { min-width: 140px; color: #b388ff; font-style: italic; }
+        .col-logic { min-width: 180px; color: #2cbb5d; }
+        .col-traps { min-width: 160px; color: #ffc01e; }
+        .col-why { min-width: 160px; color: #4fc3f7; }
+        .col-complexity { min-width: 100px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #ef4743; }
+        .diff-easy { color: #2cbb5d; } .diff-medium { color: #ffc01e; } .diff-hard { color: #ef4743; }
+        .cat-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 0.7rem; font-weight: 600; background: rgba(233, 69, 96, 0.15); color: #e94560;
+        }
+        .section-divider {
+            background: linear-gradient(90deg, #e94560, #a78bfa);
+            color: #fff; padding: 10px 16px; font-weight: 700; font-size: 0.9rem;
+        }
+        .section-divider.gemini {
+            background: linear-gradient(90deg, #a78bfa, #7c3aed);
+        }
+        .tag-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+        .tag-chip {
+            display: inline-block; padding: 1px 6px; border-radius: 4px;
+            font-size: 0.65rem; background: rgba(79, 195, 247, 0.1); color: #4fc3f7;
+            border: 1px solid rgba(79, 195, 247, 0.2);
+        }
+        .stats-bar {
+            display: flex; gap: 16px; padding: 12px 24px; color: #8b8fa3; font-size: 0.85rem;
+        }
+        .stats-bar span { color: #eff1f6; font-weight: 700; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.5rem; }
+            .controls { padding: 12px; }
+            table { font-size: 0.72rem; }
+            thead th, tbody td { padding: 8px 6px; }
+        }
+        .back-top {
+            position: fixed; bottom: 24px; right: 24px; width: 44px; height: 44px;
+            background: #e94560; color: #fff; border: none; border-radius: 50%;
+            cursor: pointer; font-size: 1.1rem; display: none; z-index: 999;
+            box-shadow: 0 4px 16px rgba(233, 69, 96, 0.4); transition: all 0.2s;
+        }
+        .back-top:hover { transform: scale(1.1); }
+        .back-top.show { display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span class="logo-bracket">&lt;</span><span class="logo-text">Crack</span><span class="logo-highlight">TCS</span><span class="logo-bracket">/&gt;</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-list"></i> Problems</a>
+            <a href="quick-revision.html" class="active"><i class="fas fa-bolt"></i> Quick Revision</a>
+            <a href="patterns.html"><i class="fas fa-puzzle-piece"></i> Patterns</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1><i class="fas fa-bolt"></i> Quick <span>Revision</span></h1>
+        <p>All 118 questions at a glance — Key logic, traps, complexity & more</p>
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search" placeholder="Search questions, topics, logic...">
+        </div>
+        <select class="filter-select" id="diff-filter">
+            <option value="all">All Difficulty</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+        </select>
+        <select class="filter-select" id="cat-filter">
+            <option value="all">All Categories</option>
+        </select>
+        <select class="filter-select" id="source-filter">
+            <option value="all">All Sources</option>
+            <option value="main">Main Questions</option>
+            <option value="gemini">Gemini PYQ</option>
+        </select>
+    </div>
+
+    <div class="stats-bar">
+        <div>Showing: <span id="showing-count">0</span> questions</div>
+        <div>Easy: <span id="easy-count">0</span></div>
+        <div>Medium: <span id="medium-count">0</span></div>
+        <div>Hard: <span id="hard-count">0</span></div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-id">#</th>
+                    <th>Diff</th>
+                    <th>Cat</th>
+                    <th class="col-title">Title</th>
+                    <th class="col-oneline">Question in 1 Line</th>
+                    <th class="col-logic">Key Logic / Approach</th>
+                    <th class="col-traps">Traps / Pitfalls</th>
+                    <th class="col-why">Why This Solution?</th>
+                    <th class="col-complexity">Complexity</th>
+                </tr>
+            </thead>
+            <tbody id="revision-tbody"></tbody>
+        </table>
+    </div>
+
+    <button class="back-top" id="back-top" title="Back to top"><i class="fas fa-arrow-up"></i></button>
+
+    <script src="questions.js"></script>
+    <script src="gemini-questions.js"></script>
+    <script>
+    // ===== REVISION DATA =====
+    const revisionData = {
+        // Main Questions (1-90)
+        1: { oneLine: "Find sum of all digits of N", logic: "Convert to string, iterate digits and sum, or use %10 and //10 loop", traps: "Handle negative numbers (use abs). Don't forget N=0 gives sum 0.", why: "Simple digit extraction—string conversion is cleanest in Python", complexity: "O(d) / O(1) where d = digits" },
+        2: { oneLine: "Reverse the digits of N", logic: "Convert to string, reverse with [::-1], convert back to int (removes leading zeros)", traps: "Leading zeros after reversal should be dropped. int() handles this.", why: "String reversal is simplest; math approach uses %10 and *10", complexity: "O(d) / O(1)" },
+        3: { oneLine: "Check if number reads same forwards & backwards", logic: "Convert N to string, compare s == s[::-1]", traps: "Single digit numbers are always palindromes. Don't forget to compare as string, not int.", why: "String comparison is most intuitive for palindrome check", complexity: "O(d) / O(d)" },
+        4: { oneLine: "Count vowels and consonants in a string", logic: "Iterate chars, check if in 'aeiouAEIOU' for vowels, rest are consonants", traps: "Case-insensitive check needed. Only alphabets count—no spaces or special chars.", why: "Simple iteration with set membership check", complexity: "O(n) / O(1)" },
+        5: { oneLine: "Check if N is prime", logic: "Check divisibility from 2 to √N. If any divides, not prime.", traps: "N < 2 is not prime. Must check up to √N inclusive. 1 is NOT prime.", why: "√N optimization: if no factor ≤ √N, N is prime", complexity: "O(√n) / O(1)" },
+        6: { oneLine: "Find GCD of two numbers", logic: "Euclidean algorithm: while b≠0, a,b = b, a%b", traps: "Order doesn't matter. Handle a=0 or b=0 edge cases.", why: "Euclidean algorithm is optimal and avoids brute force", complexity: "O(log(min(a,b))) / O(1)" },
+        7: { oneLine: "Compute N factorial", logic: "Multiply 1×2×3×...×N in a loop. 0! = 1.", traps: "0! = 1 by convention. N can be 0. Large N causes overflow in C/Java (use long).", why: "Simple iterative multiplication is efficient and avoids recursion stack", complexity: "O(n) / O(1)" },
+        8: { oneLine: "Print first N Fibonacci numbers", logic: "Start with a=0,b=1; in loop: print a, then a,b = b,a+b", traps: "N=1 should print just '0'. Off-by-one in loop count.", why: "Iterative approach avoids exponential recursion overhead", complexity: "O(n) / O(1)" },
+        9: { oneLine: "Check if N equals sum of its proper divisors", logic: "Sum all divisors from 1 to N-1 where N%i==0", traps: "1 is NOT a perfect number (sum of proper divisors of 1 is 0). Check i < N.", why: "Can optimize by checking up to √N and adding both i and N/i", complexity: "O(√n) / O(1)" },
+        10: { oneLine: "Check if sum of digits^k equals N (k = digit count)", logic: "Count digits (k), sum each digit raised to power k, compare with N", traps: "Power k varies with number of digits. 1 is Armstrong (1^1=1).", why: "Direct computation—no shortcut for narcissistic numbers", complexity: "O(d) / O(1)" },
+        11: { oneLine: "Find LCM of two numbers", logic: "LCM(a,b) = (a×b) / GCD(a,b). Find GCD first using Euclidean algo.", traps: "Use a*b//gcd to avoid float division. Integer overflow in C for large numbers.", why: "Mathematical relationship between LCM and GCD makes it efficient", complexity: "O(log(min(a,b))) / O(1)" },
+        12: { oneLine: "Check if string reads same forwards & backwards", logic: "Compare s == s[::-1]", traps: "Case-sensitive comparison. Empty string is a palindrome.", why: "String slicing is the cleanest palindrome check", complexity: "O(n) / O(n)" },
+        13: { oneLine: "Remove duplicate characters, keep first occurrence", logic: "Use a set to track seen chars. Append to result only if not seen.", traps: "Must maintain original order. set() alone loses order.", why: "Set provides O(1) lookup for seen tracking", complexity: "O(n) / O(n)" },
+        14: { oneLine: "Check if two strings are anagrams", logic: "Sort both strings (lowercased) and compare, or compare character frequency counts", traps: "Case-insensitive—convert both to lowercase. Different lengths → not anagram.", why: "Sorting approach is simple; Counter approach is O(n)", complexity: "O(n log n) / O(n)" },
+        15: { oneLine: "Sum all primes from 2 to N", logic: "For each number 2..N, check if prime, then add to sum. Or use Sieve of Eratosthenes.", traps: "Sieve is faster for large N. Don't include 1 as prime.", why: "Sieve of Eratosthenes precomputes all primes in O(N log log N)", complexity: "O(N√N) or O(N log log N) / O(N)" },
+        16: { oneLine: "Convert decimal N to binary string", logic: "Repeatedly divide by 2, prepend remainder. Or use bin() but strip '0b'.", traps: "N=0 should give '0'. Build string from right to left.", why: "Manual division shows understanding; built-ins are faster", complexity: "O(log n) / O(log n)" },
+        17: { oneLine: "Reverse word order in a sentence", logic: "Split by spaces, reverse the list, join with space", traps: "Multiple spaces should be treated as one. Leading/trailing spaces.", why: "split() handles multiple spaces automatically", complexity: "O(n) / O(n)" },
+        18: { oneLine: "Find the character with highest frequency", logic: "Build frequency dict, find max value, return first char with that frequency", traps: "If tie, return first occurrence in original string—not alphabetically first.", why: "Two-pass: build freq, then scan original string for first max", complexity: "O(n) / O(1) (26 chars max)" },
+        19: { oneLine: "Find first character that appears exactly once", logic: "Build frequency dict, then scan string for first char with count 1", traps: "Return -1 if all characters repeat. Order matters—scan original string.", why: "Two-pass approach ensures correct first occurrence", complexity: "O(n) / O(1)" },
+        20: { oneLine: "Check if string contains all 26 English letters", logic: "Convert to lowercase, extract set of alpha chars, check len == 26", traps: "Ignore non-alphabetic characters. Case-insensitive.", why: "Set of unique chars is simplest check", complexity: "O(n) / O(1)" },
+        21: { oneLine: "Check if sum of factorial of digits equals N", logic: "For each digit, compute factorial and sum them. Compare with N.", traps: "Precompute factorials 0!-9! to avoid repeated calculation.", why: "Only single-digit factorials needed (0-9)", complexity: "O(d) / O(1)" },
+        22: { oneLine: "Compress consecutive repeating chars: a3b2c1", logic: "Iterate with counter, when char changes output char+count", traps: "If count is 1, output just the char (no count). Handle last group.", why: "Single pass with tracking current char and count", complexity: "O(n) / O(n)" },
+        23: { oneLine: "Find second largest distinct element in array", logic: "Get unique elements via set, sort descending, return index [1]", traps: "All same elements → return -1. Need DISTINCT second largest, not second element.", why: "Set removes duplicates; sort gives ordered access", complexity: "O(n log n) / O(n)" },
+        24: { oneLine: "Rotate array right by K positions", logic: "K = K % N. Result = arr[-K:] + arr[:-K]", traps: "K can be > N, must use K % N. K=0 means no rotation.", why: "Slicing is O(N); reversal trick also works in-place", complexity: "O(n) / O(n)" },
+        25: { oneLine: "Find missing number in 1 to N", logic: "Expected sum N*(N+1)/2 minus actual sum = missing number", traps: "Use formula to avoid sorting. XOR approach also works.", why: "Math formula gives O(1) space, O(N) time", complexity: "O(n) / O(1)" },
+        26: { oneLine: "Find all prime factors (with repetition)", logic: "Divide by d starting from 2. While d*d ≤ N, extract all factors of d.", traps: "After loop, if N > 1, N itself is a prime factor. Include repeated factors.", why: "Trial division up to √N covers all prime factors", complexity: "O(√n) / O(log n)" },
+        27: { oneLine: "Sort array without built-in sort", logic: "Implement Bubble Sort: nested loops, swap if arr[j] > arr[j+1]", traps: "Off-by-one in inner loop (n-i-1). Can use Selection or Insertion sort too.", why: "Bubble sort is simplest to implement from scratch", complexity: "O(n²) / O(1)" },
+        28: { oneLine: "Transpose a matrix (swap rows ↔ columns)", logic: "New matrix: for each col j, row is [matrix[i][j] for i in rows]", traps: "M×N matrix becomes N×M. Don't confuse indices.", why: "Simple nested loop or zip(*matrix) in Python", complexity: "O(M×N) / O(M×N)" },
+        29: { oneLine: "Check if any pair in array sums to K", logic: "Use a set. For each element x, check if (K-x) is in set, then add x.", traps: "Handle duplicates. Check complement BEFORE adding current element.", why: "Hash set provides O(1) lookup, making it O(N) overall", complexity: "O(n) / O(n)" },
+        30: { oneLine: "Convert binary string to decimal number", logic: "Iterate bits left to right: result = result * 2 + int(bit)", traps: "Leading zeros are valid in binary. Don't use int(s,2) if not allowed.", why: "Horner's method processes bits left to right efficiently", complexity: "O(n) / O(1)" },
+        31: { oneLine: "Print frequency of each character (sorted)", logic: "Build freq dict, iterate sorted keys, print char and count", traps: "Output must be in alphabetical order. Only count chars that appear.", why: "Dictionary + sorted iteration ensures alphabetical output", complexity: "O(n + k log k) / O(k) k=unique chars" },
+        32: { oneLine: "Find the longest word in a sentence", logic: "Split into words, find max by length", traps: "If multiple words tie, return the first one. Handle multiple spaces.", why: "max() with key=len is Pythonic and clean", complexity: "O(n) / O(n)" },
+        33: { oneLine: "Shift each letter by K positions in alphabet", logic: "For each char: new = chr((ord(c) - ord('a') + K) % 26 + ord('a'))", traps: "Wrap around with modulo 26. Handle uppercase if needed separately.", why: "Modular arithmetic handles the wraparound from z to a", complexity: "O(n) / O(n)" },
+        34: { oneLine: "Check if N is a power of 2", logic: "N > 0 and (N & (N-1)) == 0. Bit trick: power of 2 has exactly one set bit.", traps: "N must be > 0. Zero is not a power of 2.", why: "Bitwise AND trick is O(1) and elegant", complexity: "O(1) / O(1)" },
+        35: { oneLine: "Count number of words in a sentence", logic: "Split by whitespace and count: len(s.split())", traps: "Multiple spaces, leading/trailing spaces. split() handles all these.", why: "split() without args handles all whitespace edge cases", complexity: "O(n) / O(n)" },
+        36: { oneLine: "Print right-angled triangle star pattern", logic: "For i in 1..N: print i stars separated by spaces", traps: "Trailing space handling. Correct number of stars per row.", why: "Nested loop approach: outer for rows, inner for stars", complexity: "O(n²) / O(1)" },
+        37: { oneLine: "Sum 1+2+...+N using recursion only", logic: "Base: f(0)=0. Recursive: f(n) = n + f(n-1).", traps: "Stack overflow for large N—increase recursion limit. Don't use formula.", why: "Direct demonstration of recursion concept", complexity: "O(n) / O(n) stack" },
+        38: { oneLine: "Find common elements in two arrays (with duplicates)", logic: "Use Counter for both arrays. For each key, take min count.", traps: "Respect duplicate counts—not just unique intersection.", why: "Counter intersection handles frequency-aware matching", complexity: "O(n+m) / O(n+m)" },
+        39: { oneLine: "Merge two sorted arrays into one sorted array", logic: "Two-pointer merge: compare front of both, pick smaller", traps: "Don't forget remaining elements after one array is exhausted.", why: "Classic merge step from merge sort—O(N+M) optimal", complexity: "O(n+m) / O(n+m)" },
+        40: { oneLine: "Check if bracket string is properly nested/balanced", logic: "Use stack. Push opening brackets, pop on closing. Match types.", traps: "Check stack empty at end. Check stack not empty before pop. Match bracket types.", why: "Stack naturally handles nested structure of brackets", complexity: "O(n) / O(n)" },
+        41: { oneLine: "Find maximum sum contiguous subarray", logic: "Kadane's: cur_sum = max(arr[i], cur_sum + arr[i]); track max_sum", traps: "All negatives: answer is the largest (least negative) element.", why: "Kadane's is the optimal O(N) one-pass algorithm", complexity: "O(n) / O(1)" },
+        42: { oneLine: "Print matrix elements in spiral order", logic: "Maintain top/bottom/left/right boundaries, traverse in 4 directions", traps: "Check boundary conditions after moving top/right. Handle single row/column.", why: "Boundary shrinking approach is clean and avoids visited matrix", complexity: "O(M×N) / O(1)" },
+        43: { oneLine: "For each element, find first larger element to its right", logic: "Use monotonic decreasing stack. Pop smaller elements when larger found.", traps: "Use indices in stack, not values. Elements with no NGE get -1.", why: "Monotonic stack processes each element at most twice → O(N)", complexity: "O(n) / O(n)" },
+        44: { oneLine: "Find length of longest common subsequence of two strings", logic: "DP table: if chars match dp[i][j]=dp[i-1][j-1]+1, else max of left/top", traps: "Subsequence ≠ substring. dp table is (m+1)×(n+1). Index offset by 1.", why: "Classic DP—overlapping subproblems make recursion exponential", complexity: "O(m×n) / O(m×n)" },
+        45: { oneLine: "Max value in knapsack without exceeding weight W", logic: "DP table: for each item, for each capacity, take or skip", traps: "0/1 means each item used at most once. Iterate capacity in right order.", why: "DP avoids exponential brute-force of all subsets", complexity: "O(N×W) / O(N×W)" },
+        46: { oneLine: "Search target in rotated sorted array in O(log N)", logic: "Binary search: determine which half is sorted, narrow search accordingly", traps: "Handle equal elements carefully. Check arr[lo] <= arr[mid] (use <=).", why: "Modified binary search maintains O(log N) by exploiting partial sorting", complexity: "O(log n) / O(1)" },
+        47: { oneLine: "Find Kth largest element in unsorted array", logic: "Sort descending, return index K-1. Or use min-heap of size K.", traps: "Kth largest in sorted order, NOT Kth distinct. 1-indexed K.", why: "Sorting is O(N log N); heap approach is O(N log K)", complexity: "O(n log n) / O(n)" },
+        48: { oneLine: "Find length of longest substring that's a palindrome", logic: "Expand around each center (both odd and even length palindromes)", traps: "Both odd-length (single center) AND even-length (double center) must be checked.", why: "Center expansion is O(N²) but cleaner than DP approach", complexity: "O(n²) / O(1)" },
+        49: { oneLine: "Multiply two matrices A(P×Q) and B(Q×R)", logic: "Triple nested loop: C[i][j] = sum(A[i][k]*B[k][j] for k)", traps: "Columns of A must equal rows of B. Initialize result matrix to 0.", why: "Standard O(P×Q×R) multiplication algorithm", complexity: "O(P×Q×R) / O(P×R)" },
+        50: { oneLine: "Sort characters by frequency (desc), break ties by ASCII", logic: "Count frequencies, sort by (-freq, char), build result string", traps: "Same frequency → smaller ASCII first. Stable or explicit tie-breaking needed.", why: "Custom sort key handles both criteria", complexity: "O(n log n) / O(n)" },
+        51: { oneLine: "Min operations to convert string S1 to S2 (insert/delete/replace)", logic: "DP: dp[i][j] = min edits for s1[:i] → s2[:j]. Base: dp[i][0]=i, dp[0][j]=j", traps: "Three operations to consider at each step. dp table is (m+1)×(n+1).", why: "Classic DP with optimal substructure", complexity: "O(m×n) / O(m×n)" },
+        52: { oneLine: "Count ways to place N non-attacking queens on N×N board", logic: "Backtracking: place queen row by row, track columns and diagonals", traps: "Track both diagonals: (row-col) and (row+col). Backtrack properly (remove markers).", why: "Backtracking explores valid placements and prunes invalid branches", complexity: "O(N!) / O(N)" },
+        53: { oneLine: "Find length of longest strictly increasing subsequence", logic: "DP: dp[i] = max(dp[j]+1) for all j < i where arr[j] < arr[i]", traps: "Strictly increasing (not ≤). Initialize all dp[i] = 1. Answer is max(dp).", why: "DP solves overlapping subproblems; O(N log N) with binary search possible", complexity: "O(n²) / O(n)" },
+        54: { oneLine: "Print all moves to solve Tower of Hanoi with N disks", logic: "Recursion: move N-1 to aux, move Nth to dest, move N-1 from aux to dest", traps: "Print format matters. Total moves = 2^N - 1. Correct rod naming.", why: "Natural recursive decomposition of the problem", complexity: "O(2ⁿ) / O(n) stack" },
+        55: { oneLine: "Find shortest path from source to all vertices (positive weights)", logic: "Dijkstra's: priority queue (min-heap), relax edges greedily", traps: "Only works with non-negative weights. Check for unreachable vertices (-1).", why: "Greedy + priority queue gives optimal shortest paths", complexity: "O((V+E) log V) / O(V)" },
+        56: { oneLine: "Check if sum of digits of N² equals N", logic: "Compute N², sum its digits, compare with N", traps: "Only 0, 1, 9 are neon numbers. Large squares possible for big N.", why: "Direct computation—no mathematical shortcut needed", complexity: "O(d) / O(1)" },
+        57: { oneLine: "Check if N² ends with N", logic: "Compute N², check if str(N²) ends with str(N)", traps: "Use string endswith, not modulo (simpler). Examples: 25, 76, 376.", why: "String comparison avoids modular arithmetic complexity", complexity: "O(d) / O(1)" },
+        58: { oneLine: "Convert number (0-9999) to English words", logic: "Handle thousands, hundreds, tens, ones separately with lookup arrays", traps: "Special cases: 0→'Zero', teens (11-19), tens multiples. Spacing between words.", why: "Lookup table approach handles all English number irregularities", complexity: "O(1) / O(1)" },
+        59: { oneLine: "Print all permutations in lexicographic order", logic: "Use itertools.permutations in Python, sort results. Or backtracking.", traps: "Must be in sorted order. For distinct chars, all N! permutations.", why: "itertools handles generation; sorting ensures lex order", complexity: "O(N! × N) / O(N! × N)" },
+        60: { oneLine: "Length of longest substring with all unique characters", logic: "Sliding window with hash map tracking last index of each char", traps: "Update window start when duplicate found. Use max of current start and last seen+1.", why: "Sliding window avoids O(N²) brute force of all substrings", complexity: "O(n) / O(min(n, alphabet))" },
+        61: { oneLine: "Compare two strings after processing # as backspace", logic: "Use stack for each string: # pops, else push. Compare final stacks.", traps: "Empty stack + backspace = still empty (no error). Compare results, not intermediate.", why: "Stack naturally handles backspace delete-last behavior", complexity: "O(n+m) / O(n+m)" },
+        62: { oneLine: "Find sentence with most words (comma-separated)", logic: "Split by comma, split each sentence by space, find max word count", traps: "Strip whitespace from sentences. Empty words from multiple spaces.", why: "String split operations give direct word counts", complexity: "O(n) / O(n)" },
+        63: { oneLine: "Decode coded string (1-9 = a-i, 10#-26# = j-z)", logic: "Scan left to right: if s[i+2]=='#', take 2-digit number, else 1-digit", traps: "Check i+2 < len(s) before accessing. '#' at odd positions is tricky.", why: "Greedy lookahead for # marker determines 1-digit vs 2-digit", complexity: "O(n) / O(n)" },
+        64: { oneLine: "Total matches in tournament = N - 1", logic: "Each match eliminates one creature. N-1 eliminations needed for 1 champion.", traps: "Don't simulate rounds. The answer is always N-1 regardless of odd/even.", why: "Mathematical insight: every match eliminates exactly one participant", complexity: "O(1) / O(1)" },
+        65: { oneLine: "Count combinations of 3 same-colored socks", logic: "Count frequency per color, sum C(count, 3) for each color", traps: "Need at least 3 of same color. C(n,3) = n*(n-1)*(n-2)/6.", why: "Combinatorics formula directly counts valid triplets", complexity: "O(n) / O(n)" },
+        66: { oneLine: "Swap Kth from start and Kth from end in a list", logic: "Swap arr[K-1] and arr[N-K] (0-indexed)", traps: "If K-1 == N-K, no change needed. 1-indexed K in problem.", why: "Direct index access in array—O(1) swap", complexity: "O(1) / O(1)" },
+        67: { oneLine: "Count spacecraft fleets arriving at destination", logic: "Sort by position desc, compute arrival time. Fleet forms when faster ship catches slower.", traps: "Sort by POSITION descending. A fleet's time is the slowest member's time.", why: "Greedy: process from closest to target, track current slowest time", complexity: "O(n log n) / O(n)" },
+        68: { oneLine: "Find Kth character of reversed string", logic: "Reverse string, return index K-1. Or return s[N-K] directly.", traps: "1-indexed K. s[::-1][K-1] == s[N-K].", why: "Direct index calculation avoids actually reversing", complexity: "O(1) / O(1)" },
+        69: { oneLine: "Min additions to make sequence pairable as (a, a×X)", logic: "Sort array, greedily pair each element with its X-multiple using freq map", traps: "Process smallest first. Handle X=1 special case (pairs of equal elements).", why: "Greedy pairing from smallest ensures optimal matching", complexity: "O(n log n) / O(n)" },
+        70: { oneLine: "Build doubly linked list from 2D array (even rows first, odd rows next)", logic: "Collect even-indexed rows, then odd-indexed rows, flatten and format", traps: "0-indexed rows: row 0 is even. Output format: 'val <---> null'.", why: "Separate collection of even/odd rows then concatenate", complexity: "O(N×M) / O(N×M)" },
+        71: { oneLine: "Find index where left sum equals right sum", logic: "Total sum - running left sum - arr[i] = right sum. Check equality.", traps: "Element at equilibrium index excluded from both sums. Return first index found.", why: "Prefix sum avoids O(N²) recomputation", complexity: "O(n) / O(1)" },
+        72: { oneLine: "Find contiguous subarray with maximum product", logic: "Track cur_max and cur_min (negative × negative = positive). Swap on negative.", traps: "Negative numbers can flip max/min. Zero resets both. Handle all-negative case.", why: "Tracking both max and min handles negative number flips", complexity: "O(n) / O(1)" },
+        73: { oneLine: "Replace every 0 digit with 5", logic: "Convert to string, replace '0' with '5', print", traps: "Input '0' becomes '5'. Don't convert to int if it removes leading digits.", why: "String replacement is simplest approach", complexity: "O(d) / O(d)" },
+        74: { oneLine: "Max profit from one buy and one sell", logic: "Track min_price so far, at each step compute profit = price - min_price", traps: "Must buy before selling. If prices only decrease, answer is 0.", why: "One-pass tracking of minimum eliminates nested loop", complexity: "O(n) / O(1)" },
+        75: { oneLine: "Compute trapped rainwater given elevation map", logic: "For each bar: water = min(left_max, right_max) - height. Precompute left/right max arrays.", traps: "First and last bars trap nothing. Two-pointer approach saves space.", why: "Precomputed boundaries avoid repeated max scans", complexity: "O(n) / O(n)" },
+        76: { oneLine: "Find element appearing exactly once (others appear twice)", logic: "XOR all elements: duplicates cancel out (a^a=0), leaving the unique one", traps: "Works only when others appear EXACTLY twice. 0 XOR x = x.", why: "XOR is O(1) space magic for this specific problem", complexity: "O(n) / O(1)" },
+        77: { oneLine: "Count ways to climb N stairs (1 or 2 steps)", logic: "Fibonacci-like: ways(n) = ways(n-1) + ways(n-2). Base: ways(0)=1, ways(1)=1.", traps: "This is Fibonacci shifted by 1. ways(4)=5 not 4. Use iterative to avoid stack overflow.", why: "DP avoids exponential recursion", complexity: "O(n) / O(1)" },
+        78: { oneLine: "Check if any subset sums to target", logic: "DP: dp[j] = True if some subset sums to j. Process each num backwards.", traps: "Iterate capacity from target DOWN to num (0/1 knapsack). dp[0]=True base case.", why: "Boolean DP avoids exponential subset enumeration", complexity: "O(N×sum) / O(sum)" },
+        79: { oneLine: "Min jumps to reach end of array", logic: "Greedy: track maxReach and steps. When steps=0, must jump.", traps: "arr[0]=0 means unreachable. Handle single element (0 jumps). Check i >= maxReach for impossible.", why: "Greedy tracks farthest reachable point in current jump range", complexity: "O(n) / O(1)" },
+        80: { oneLine: "Find max consecutive 1s in binary array", logic: "Count consecutive 1s, reset on 0, track maximum", traps: "Reset counter on 0, not just decrement. Array of all 0s → answer 0.", why: "Single pass with running counter is optimal", complexity: "O(n) / O(1)" },
+        81: { oneLine: "Check if array B is subset of array A (considering duplicates)", logic: "Counter(B) ≤ Counter(A) for all elements", traps: "Must check frequency, not just presence. [2,2] is NOT subset of [2,3].", why: "Counter comparison handles duplicate frequency requirement", complexity: "O(n+m) / O(n+m)" },
+        82: { oneLine: "Match pattern with ? (any char) and * (any sequence) wildcards", logic: "DP: dp[i][j] = pattern[:i] matches text[:j]. * can match empty or extend.", traps: "* matches empty sequence too. dp dimensions are (pattern_len+1)×(text_len+1).", why: "DP handles * ambiguity (match 0 or more characters)", complexity: "O(m×n) / O(m×n)" },
+        83: { oneLine: "Replace each element with its rank (1-based)", logic: "Sort unique values, build rank map {val: rank}, map original array", traps: "Equal elements get same rank. Ranks start at 1, not 0.", why: "Sorting + hash map provides clean rank assignment", complexity: "O(n log n) / O(n)" },
+        84: { oneLine: "Sort array elements by their frequency (descending)", logic: "Count frequency, sort by (-freq, first_occurrence)", traps: "Same frequency → earlier first occurrence comes first. Stable sort or explicit key.", why: "Custom sort key handles both frequency and order tie-breaking", complexity: "O(n log n) / O(n)" },
+        85: { oneLine: "Check if string contains all 26 lowercase letters", logic: "set(s) ⊇ set('a'-'z')", traps: "Output is 'True'/'False' (case-sensitive). Only lowercase input.", why: "Set subset check is clean and O(n)", complexity: "O(n) / O(1)" },
+        86: { oneLine: "Encode string as char+count for each unique char (in order)", logic: "Use OrderedDict to count, then concatenate char+str(count)", traps: "Counts ALL occurrences across string (not consecutive runs). Order of first appearance.", why: "OrderedDict preserves insertion order for output", complexity: "O(n) / O(n)" },
+        87: { oneLine: "Check if year is a leap year", logic: "(divisible by 4 AND not by 100) OR (divisible by 400)", traps: "1900 is NOT leap (div by 100 but not 400). 2000 IS leap (div by 400).", why: "Direct conditional check of leap year rules", complexity: "O(1) / O(1)" },
+        88: { oneLine: "Add two fractions and reduce to simplest form", logic: "Cross multiply: num=a*d+c*b, den=b*d. Reduce by GCD.", traps: "Reduce using GCD of numerator and denominator. Handle 0 numerator.", why: "Cross multiplication + GCD reduction is the standard approach", complexity: "O(log(min)) / O(1)" },
+        89: { oneLine: "Max sum of non-adjacent house values (House Robber)", logic: "DP: dp[i] = max(dp[i-1], dp[i-2] + arr[i]). Two variables suffice.", traps: "Cannot rob adjacent houses. Single house = its value. Two houses = max of both.", why: "Classic DP: at each house, choose to rob (add to i-2) or skip (keep i-1)", complexity: "O(n) / O(1)" },
+        90: { oneLine: "Search target in rotated sorted array (O(log n))", logic: "Binary search: determine sorted half, decide which half to search", traps: "Use <= for sorted half check. Handle duplicates if present.", why: "Modified binary search exploits partial sorting in rotated array", complexity: "O(log n) / O(1)" },
+        // Gemini Questions (g1-g28)
+        "g1": { oneLine: "Count subsets with sum equal to S (mod 10⁹+7)", logic: "DP: dp[j] += dp[j-num] for each num. dp[0]=1. Iterate capacity backwards.", traps: "Use modulo. Zeros in array double the count. Backward iteration for 0/1 knapsack.", why: "Subset sum DP avoids 2^N brute force", complexity: "O(N×S) / O(S)" },
+        "g2": { oneLine: "Compare strings after # backspace processing", logic: "Stack simulation: push chars, pop on #. Compare final results.", traps: "Backspace on empty string does nothing. Both strings get separate stacks.", why: "Stack naturally models backspace behavior", complexity: "O(n+m) / O(n+m)" },
+        "g3": { oneLine: "Difference between count of * and # in string", logic: "Count * and #, return stars - hashes", traps: "Positive if more *, negative if more #, zero if equal.", why: "Simple counting—no complex logic needed", complexity: "O(n) / O(1)" },
+        "g4": { oneLine: "Find count of 2-wheelers and 4-wheelers given totals", logic: "tw = (4V - W)/2, fw = (W - 2V)/2. Validate inputs.", traps: "Many edge cases: odd W, V ≥ W, negative counts, W < 2V, W > 4V.", why: "System of 2 linear equations with validation", complexity: "O(1) / O(1)" },
+        "g5": { oneLine: "Print all primes in range [L, R]", logic: "For each number in range, check if prime (trial division to √n)", traps: "1 is not prime. Handle L=1 specifically. Empty range possible.", why: "Trial division per number; Sieve for large ranges", complexity: "O((R-L)×√R) / O(1)" },
+        "g6": { oneLine: "Max sum of two non-overlapping subarrays of length K", logic: "Prefix sums + track best left window. For each right window start, combine.", traps: "Non-overlapping: windows can't share indices. Try both orderings.", why: "Prefix sum + running max avoids O(N²) brute force", complexity: "O(n) / O(n)" },
+        "g7": { oneLine: "Convert English words to number (e.g., 'twenty one' → 21)", logic: "Map words to values. Handle 'hundred' as ×100, 'thousand' as ×1000 + accumulate.", traps: "Compound numbers: 'twenty one' has space. 'thousand' resets accumulator.", why: "Stateful parsing with multiplier words triggering accumulation", complexity: "O(w) / O(1) w=word count" },
+        "g8": { oneLine: "Min coin denominations to pay any price 1 to N", logic: "Use powers of 2 (1,2,4,8...). Answer = ceil(log₂(N+1)).", traps: "Each denomination used at most once (like binary representation).", why: "Binary representation can represent any number with minimal denominations", complexity: "O(1) / O(1)" },
+        "g9": { oneLine: "Count total 5×5 pieces from chocolate bars of varying sizes", logic: "For each L×W combination, count floor(L*W / 25). Sum all.", traps: "Small bars (area < 25) give 0 pieces. Iterate all L and W in range.", why: "Simple area division for each combination", complexity: "O((Q-P)×(S-R)) / O(1)" },
+        "g10": { oneLine: "Max queue size with 5000-second expiry window", logic: "Sliding window / deque: remove timestamps ≤ t-5000, add new, track max size", traps: "Remove ALL expired entries (not just one). Boundary: <= t-5000.", why: "Deque provides efficient front removal for sliding window", complexity: "O(n) / O(n)" },
+        "g11": { oneLine: "Find solar system with maximum total moons", logic: "For each row (sun), sum planet moons, track maximum", traps: "Simple row-sum comparison. Handle single sun/planet.", why: "One pass row-sum comparison", complexity: "O(N×M) / O(1)" },
+        "g12": { oneLine: "Interleave IDs and sizes from merged arrays", logic: "Split array: first N = IDs, last N = sizes. Interleave: ID₁,size₁,ID₂,size₂...", traps: "Array is 2N elements. First half is IDs, second half is sizes.", why: "Direct index-based interleaving", complexity: "O(n) / O(n)" },
+        "g13": { oneLine: "Min moves to make all occupied seats contiguous", logic: "Try all windows of K consecutive seats. For each, compute move cost from occupied positions.", traps: "Count number of arrangements achieving minimum. Sliding window optimization.", why: "Median-based positioning minimizes total moves", complexity: "O(N×K) / O(K)" },
+        "g14": { oneLine: "Find smallest positive integer not in array", logic: "Put all positives in a set. Check 1, 2, 3... until not found.", traps: "Ignore negatives and zeros. Answer starts from 1, not 0.", why: "Hash set provides O(1) lookup for each candidate", complexity: "O(n) / O(n)" },
+        "g15": { oneLine: "Smallest permutation of digits of A that exceeds B", logic: "Generate all permutations of A's digits, find smallest > B", traps: "Leading zeros make a number smaller. Handle no valid permutation → -1.", why: "For small digit counts, brute-force all permutations works", complexity: "O(d! × d) / O(d!)" },
+        "g16": { oneLine: "Absolute difference of odd-position and even-position digit sums", logic: "Sum digits at odd indices (1,3,5..) and even indices (2,4,6..). Take abs diff.", traps: "1-indexed positions. Number can be up to 100 digits (use string, not int).", why: "Simple alternating sum with absolute difference", complexity: "O(d) / O(1)" },
+        "g17": { oneLine: "Find row with most filled parking spots (1s)", logic: "Sum each row, track row index with maximum sum", traps: "0-based index. Tie → return smallest index (first found).", why: "Simple row-sum comparison", complexity: "O(R×C) / O(1)" },
+        "g18": { oneLine: "Find balloon color with odd occurrence count", logic: "Count frequencies, find the one with odd count", traps: "Exactly one odd-count color guaranteed. Could be uppercase.", why: "XOR works for single chars; Counter for general case", complexity: "O(n) / O(n)" },
+        "g19": { oneLine: "Convert base-17 number (0-9, A-G) to decimal", logic: "Process left to right: result = result × 17 + digit_value", traps: "A=10 through G=16. Case-insensitive handling.", why: "Horner's method for base conversion", complexity: "O(d) / O(1)" },
+        "g20": { oneLine: "Check if word is a Go language keyword", logic: "Check membership in predefined set of keywords", traps: "Case-sensitive: 'IF' is NOT a keyword but 'if' is.", why: "Set lookup is O(1) for membership check", complexity: "O(1) / O(1)" },
+        "g21": { oneLine: "Nth term: odd positions = 2^k, even positions = 3^k", logic: "Odd pos: 2^((N-1)/2). Even pos: 3^((N-2)/2).", traps: "1-indexed. First term (pos 1) is 2⁰=1, second (pos 2) is 3⁰=1.", why: "Direct formula based on position parity", complexity: "O(1) / O(1)" },
+        "g22": { oneLine: "Transform 3 words: vowels→*, consonants→@, uppercase", logic: "Word1: replace vowels with *. Word2: replace consonants with @. Word3: upper().", traps: "Case-insensitive vowel detection. Concatenate without separator.", why: "Per-word transformation rules applied independently", complexity: "O(n) / O(n)" },
+        "g23": { oneLine: "Nth term of interleaved Fibonacci and Prime series", logic: "Odd positions: Fibonacci[k]. Even positions: kth prime.", traps: "Fibonacci starts 0,1,1,2... Primes start 2,3,5,7... Compute enough terms.", why: "Separate generation of Fibonacci and prime sequences", complexity: "O(N) / O(N)" },
+        "g24": { oneLine: "Generate all unique permutations of A, B, C with given counts", logic: "Generate all permutations, deduplicate, sort lexicographically", traps: "Duplicates from repeated characters. Must be in lex order.", why: "itertools.permutations + set for dedup; sort for order", complexity: "O(N! / (a!b!c!)) / O(same)" },
+        "g25": { oneLine: "Min total salary difference across tables (max K+1 per table)", logic: "Sort salaries. DP: dp[i] = min cost to seat first i people. Try group sizes 1..K+1.", traps: "Group consecutive sorted elements to minimize range within groups.", why: "Sorting + DP ensures optimal grouping of similar salaries", complexity: "O(N×K) / O(N)" },
+        "g26": { oneLine: "Find string set with maximum count of 'a'", logic: "For each string, count 'a's. Return the maximum.", traps: "A set with no 'a's contributes 0. Output is count, not the string.", why: "Simple max comparison across strings", complexity: "O(total chars) / O(1)" },
+        "g27": { oneLine: "Remove brackets and fix signs in algebraic expression", logic: "Stack tracks sign multiplier. Minus before ( flips signs inside.", traps: "Nested brackets compound sign flips. -(-(x)) = +x. Handle leading sign.", why: "Sign stack handles arbitrary nesting depth", complexity: "O(n) / O(n)" },
+        "g28": { oneLine: "Count even-coordinate lattice points inside a polygon", logic: "For each even-even grid point in bounding box, check if inside polygon", traps: "Include boundary points. Polygon may be non-convex—use ray casting.", why: "Point-in-polygon test at each candidate grid point", complexity: "O(Area × N) / O(N)" },
+    };
+
+    // Build combined question list
+    function buildAllQuestions() {
+        const all = [];
+        questions.forEach(q => {
+            const rd = revisionData[q.id] || {};
+            all.push({
+                id: q.id, displayId: q.id, title: q.title, difficulty: q.difficulty,
+                category: q.category, tags: q.tags, source: 'main',
+                description: q.description,
+                oneLine: rd.oneLine || '', logic: rd.logic || '', traps: rd.traps || '',
+                why: rd.why || '', complexity: rd.complexity || ''
+            });
+        });
+        geminiQuestions.forEach(q => {
+            const rd = revisionData[q.id] || {};
+            all.push({
+                id: q.id, displayId: q.id.replace('g', 'G'), title: q.title, difficulty: q.difficulty,
+                category: q.category, tags: q.tags, source: 'gemini',
+                description: q.description,
+                oneLine: rd.oneLine || '', logic: rd.logic || '', traps: rd.traps || '',
+                why: rd.why || '', complexity: rd.complexity || ''
+            });
+        });
+        return all;
+    }
+
+    const allQuestions = buildAllQuestions();
+
+    // Populate category filter
+    const cats = [...new Set(allQuestions.map(q => q.category))].sort();
+    const catFilter = document.getElementById('cat-filter');
+    cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; catFilter.appendChild(o); });
+
+    function renderTable(list) {
+        const tbody = document.getElementById('revision-tbody');
+        tbody.innerHTML = list.map(q => {
+            const diffClass = q.difficulty === 'Easy' ? 'diff-easy' : q.difficulty === 'Medium' ? 'diff-medium' : 'diff-hard';
+            return `<tr>
+                <td class="col-id">${q.displayId}</td>
+                <td><span class="${diffClass}" style="font-weight:600;font-size:0.72rem">${q.difficulty}</span></td>
+                <td><span class="cat-badge">${q.category}</span></td>
+                <td class="col-title">${q.title}</td>
+                <td class="col-oneline">${q.oneLine}</td>
+                <td class="col-logic">${q.logic}</td>
+                <td class="col-traps">${q.traps}</td>
+                <td class="col-why">${q.why}</td>
+                <td class="col-complexity">${q.complexity}</td>
+            </tr>`;
+        }).join('');
+
+        document.getElementById('showing-count').textContent = list.length;
+        document.getElementById('easy-count').textContent = list.filter(q => q.difficulty === 'Easy').length;
+        document.getElementById('medium-count').textContent = list.filter(q => q.difficulty === 'Medium').length;
+        document.getElementById('hard-count').textContent = list.filter(q => q.difficulty === 'Hard').length;
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('search').value.toLowerCase();
+        const diff = document.getElementById('diff-filter').value;
+        const cat = document.getElementById('cat-filter').value;
+        const src = document.getElementById('source-filter').value;
+
+        let filtered = allQuestions.filter(q => {
+            if (diff !== 'all' && q.difficulty !== diff) return false;
+            if (cat !== 'all' && q.category !== cat) return false;
+            if (src !== 'all' && q.source !== src) return false;
+            if (search) {
+                const hay = `${q.title} ${q.oneLine} ${q.logic} ${q.traps} ${q.why} ${q.tags.join(' ')} ${q.category}`.toLowerCase();
+                if (!hay.includes(search)) return false;
+            }
+            return true;
+        });
+        renderTable(filtered);
+    }
+
+    document.getElementById('search').addEventListener('input', applyFilters);
+    document.getElementById('diff-filter').addEventListener('change', applyFilters);
+    document.getElementById('cat-filter').addEventListener('change', applyFilters);
+    document.getElementById('source-filter').addEventListener('change', applyFilters);
+
+    // Back to top button
+    const btn = document.getElementById('back-top');
+    window.addEventListener('scroll', () => { btn.classList.toggle('show', window.scrollY > 400); });
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // Initial render
+    renderTable(allQuestions);
+    </script>
+</body>
+</html>
