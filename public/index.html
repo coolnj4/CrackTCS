@@ -22,8 +22,8 @@
             <a href="#" class="nav-link active" data-view="problems"><i class="fas fa-list"></i> Problems</a>
             <a href="#" class="nav-link" data-view="gemini"><i class="fas fa-gem"></i> Gemini PYQ</a>
             <a href="#" class="nav-link" data-view="dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a>
-            <a href="quick-revision.html" class="nav-link"><i class="fas fa-bolt"></i> Quick Revision</a>
-            <a href="patterns.html" class="nav-link"><i class="fas fa-puzzle-piece"></i> Patterns</a>
+            <a href="#" class="nav-link" data-view="revision"><i class="fas fa-bolt"></i> Quick Revision</a>
+            <a href="#" class="nav-link" data-view="patterns"><i class="fas fa-puzzle-piece"></i> Patterns</a>
         </div>
         <div class="nav-right">
             <div class="streak-badge">
@@ -347,6 +347,68 @@
         </div>
     </div>
 
+    <!-- ============ QUICK REVISION VIEW ============ -->
+    <div id="revision-view" class="view">
+        <div class="revision-hero">
+            <h1><i class="fas fa-bolt"></i> Quick <span>Revision</span></h1>
+            <p>All 118 questions at a glance — Key logic, traps, complexity & more</p>
+        </div>
+        <div class="revision-controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="revision-search" placeholder="Search questions, topics, logic...">
+            </div>
+            <select class="filter-select" id="revision-diff-filter">
+                <option value="all">All Difficulty</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+            <select class="filter-select" id="revision-cat-filter">
+                <option value="all">All Categories</option>
+            </select>
+            <select class="filter-select" id="revision-source-filter">
+                <option value="all">All Sources</option>
+                <option value="main">Main Questions</option>
+                <option value="gemini">Gemini PYQ</option>
+            </select>
+        </div>
+        <div class="revision-stats-bar">
+            <div>Showing: <span id="rev-showing">0</span> questions</div>
+            <div>Easy: <span id="rev-easy">0</span></div>
+            <div>Medium: <span id="rev-medium">0</span></div>
+            <div>Hard: <span id="rev-hard">0</span></div>
+        </div>
+        <div class="revision-table-wrap">
+            <table class="revision-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Diff</th>
+                        <th>Cat</th>
+                        <th>Title</th>
+                        <th>Question in 1 Line</th>
+                        <th>Key Logic / Approach</th>
+                        <th>Traps / Pitfalls</th>
+                        <th>Why This Solution?</th>
+                        <th>Complexity</th>
+                    </tr>
+                </thead>
+                <tbody id="revision-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ============ PATTERNS VIEW ============ -->
+    <div id="patterns-view" class="view">
+        <div class="patterns-hero">
+            <h1><i class="fas fa-puzzle-piece"></i> Common Problem <span>Patterns</span></h1>
+            <p>Questions grouped by solving pattern — Master the technique, solve any variant</p>
+        </div>
+        <div class="patterns-toc" id="patterns-toc"></div>
+        <div class="patterns-grid" id="patterns-grid"></div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay hidden">
         <div class="spinner"></div>
@@ -385,6 +447,7 @@
     <!-- Scripts -->
     <script src="questions.js"></script>
     <script src="gemini-questions.js"></script>
+    <script src="revision-data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
     <script src="app.js"></script>
 </body>

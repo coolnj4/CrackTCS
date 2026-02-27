@@ -359,6 +359,16 @@ function switchView(viewName) {
   if (viewName === 'dashboard') {
     renderDashboard();
   }
+
+  // Render revision view when opened
+  if (viewName === 'revision') {
+    renderRevision();
+  }
+
+  // Render patterns view when opened
+  if (viewName === 'patterns') {
+    renderPatterns();
+  }
 }
 
 // ==================== PROBLEMS LIST ====================
@@ -1396,6 +1406,164 @@ function showToast(message, type = 'info') {
 function showLoading(show) {
   const overlay = document.getElementById('loading-overlay');
   overlay.classList.toggle('hidden', !show);
+}
+
+// ==================== QUICK REVISION ====================
+let revisionBuilt = false;
+let allRevisionQuestions = [];
+
+function buildRevisionQuestions() {
+  if (revisionBuilt) return;
+  allRevisionQuestions = [];
+
+  // Main questions (IDs 1-90)
+  questions.forEach(q => {
+    const rd = revisionData[q.id] || {};
+    allRevisionQuestions.push({
+      id: q.id,
+      displayId: String(q.id),
+      title: q.title,
+      difficulty: q.difficulty,
+      category: q.category,
+      source: 'main',
+      oneLine: rd.oneLine || '',
+      logic: rd.logic || '',
+      traps: rd.traps || '',
+      why: rd.why || '',
+      complexity: rd.complexity || ''
+    });
+  });
+
+  // Gemini questions (IDs g1-g28)
+  geminiQuestions.forEach(q => {
+    const rd = revisionData[q.id] || {};
+    allRevisionQuestions.push({
+      id: q.id,
+      displayId: String(q.id),
+      title: q.title,
+      difficulty: q.difficulty,
+      category: q.category,
+      source: 'gemini',
+      oneLine: rd.oneLine || '',
+      logic: rd.logic || '',
+      traps: rd.traps || '',
+      why: rd.why || '',
+      complexity: rd.complexity || ''
+    });
+  });
+
+  // Populate category filter
+  const catFilter = document.getElementById('revision-cat-filter');
+  const cats = [...new Set(allRevisionQuestions.map(q => q.category))].sort();
+  catFilter.innerHTML = '<option value="all">All Categories</option>' +
+    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  revisionBuilt = true;
+}
+
+function renderRevision() {
+  buildRevisionQuestions();
+  applyRevisionFilters();
+}
+
+function applyRevisionFilters() {
+  const search = (document.getElementById('revision-search').value || '').toLowerCase();
+  const diff = document.getElementById('revision-diff-filter').value;
+  const cat = document.getElementById('revision-cat-filter').value;
+  const src = document.getElementById('revision-source-filter').value;
+
+  let filtered = allRevisionQuestions.filter(q => {
+    if (diff !== 'all' && q.difficulty !== diff) return false;
+    if (cat !== 'all' && q.category !== cat) return false;
+    if (src !== 'all' && q.source !== src) return false;
+    if (search) {
+      const hay = (q.displayId + ' ' + q.title + ' ' + q.category + ' ' + q.oneLine + ' ' + q.logic + ' ' + q.traps + ' ' + q.why).toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('revision-tbody');
+  tbody.innerHTML = filtered.map(q => {
+    const dc = q.difficulty.toLowerCase();
+    return `<tr>
+      <td>${q.displayId}</td>
+      <td><span class="diff-badge ${dc}">${q.difficulty}</span></td>
+      <td><span class="cat-tag">${q.category}</span></td>
+      <td>${q.title}</td>
+      <td>${q.oneLine}</td>
+      <td>${q.logic}</td>
+      <td>${q.traps}</td>
+      <td>${q.why}</td>
+      <td>${q.complexity}</td>
+    </tr>`;
+  }).join('');
+
+  // Stats
+  const easy = filtered.filter(q => q.difficulty === 'Easy').length;
+  const med = filtered.filter(q => q.difficulty === 'Medium').length;
+  const hard = filtered.filter(q => q.difficulty === 'Hard').length;
+  document.getElementById('rev-showing').textContent = filtered.length;
+  document.getElementById('rev-easy').textContent = easy;
+  document.getElementById('rev-medium').textContent = med;
+  document.getElementById('rev-hard').textContent = hard;
+}
+
+// Revision event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const revSearch = document.getElementById('revision-search');
+  const revDiff = document.getElementById('revision-diff-filter');
+  const revCat = document.getElementById('revision-cat-filter');
+  const revSrc = document.getElementById('revision-source-filter');
+  if (revSearch) revSearch.addEventListener('input', applyRevisionFilters);
+  if (revDiff) revDiff.addEventListener('change', applyRevisionFilters);
+  if (revCat) revCat.addEventListener('change', applyRevisionFilters);
+  if (revSrc) revSrc.addEventListener('change', applyRevisionFilters);
+});
+
+// ==================== PATTERNS ====================
+let patternsBuilt = false;
+
+function renderPatterns() {
+  if (patternsBuilt) return;
+
+  // Build question lookup map
+  const qMap = {};
+  questions.forEach(q => { qMap[q.id] = q; });
+  geminiQuestions.forEach(q => { qMap[q.id] = q; });
+
+  // Render TOC
+  const toc = document.getElementById('patterns-toc');
+  toc.innerHTML = patternDefinitions.map((p, i) => {
+    return `<a class="toc-chip" href="#pattern-${i}" style="background:${p.color}22;color:${p.color}" onclick="event.preventDefault();document.getElementById('pattern-${i}').scrollIntoView({behavior:'smooth'})">${p.icon} ${p.name}</a>`;
+  }).join('');
+
+  // Render grid
+  const grid = document.getElementById('patterns-grid');
+  grid.innerHTML = patternDefinitions.map((p, i) => {
+    const qList = p.questionIds.map(id => {
+      const q = qMap[id];
+      if (!q) return '';
+      const dc = q.difficulty.toLowerCase();
+      return `<li class="pq-item">
+        <span class="pq-id" style="color:${p.color}">${q.id}</span>
+        <span class="pq-title">${q.title}</span>
+        <span class="pq-diff ${dc}">${q.difficulty}</span>
+      </li>`;
+    }).join('');
+
+    return `<div class="pattern-card" id="pattern-${i}">
+      <div class="pattern-header">
+        <span class="pattern-icon">${p.icon}</span>
+        <h2 style="color:${p.color}">${p.name}</h2>
+        <span class="q-count">${p.questionIds.length} Qs</span>
+      </div>
+      <div class="key-idea">${p.keyIdea}</div>
+      <ul class="pq-list">${qList}</ul>
+    </div>`;
+  }).join('');
+
+  patternsBuilt = true;
 }
 
 // ==================== KEYBOARD SHORTCUTS ====================
