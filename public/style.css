@@ -153,13 +153,15 @@ select, input, textarea {
 
 .nav-center {
     display: flex;
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .nav-link {
-    padding: 8px 20px;
+    padding: 7px 14px;
     border-radius: var(--radius-md);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 500;
     color: var(--text-secondary);
     transition: var(--transition);
@@ -1331,7 +1333,11 @@ select, input, textarea {
         padding: 0 12px;
     }
     .nav-center {
-        display: none;
+        gap: 4px;
+    }
+    .nav-link {
+        padding: 6px 10px;
+        font-size: 0.75rem;
     }
     .filters-bar {
         flex-direction: column;
